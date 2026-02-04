@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Nop.Web.Areas.Admin.Models.Notes.SimpleNoteModel>
+
+<h1>Simple Notes</h1>
+
+<a class="btn btn-primary" asp-action="Create">Create New</a>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Created On</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var note in Model)
+        {
+            <tr>
+                <td>@note.Id</td>
+                <td>@note.Title</td>
+                <td>@note.Description</td>
+                <td>@note.CreatedOnUtc</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@note.Id" class="btn btn-secondary btn-sm">Edit</a>
+
+                    <form asp-action="Delete" asp-route-id="@note.Id" method="post" style="display:inline;">
+                        <button class="btn btn-danger btn-sm"
+                                onclick="return confirm('Delete this note?');">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

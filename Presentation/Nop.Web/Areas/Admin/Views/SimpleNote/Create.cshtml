@@ -1,0 +1,18 @@
+﻿@model Nop.Web.Areas.Admin.Models.Notes.SimpleNoteModel
+
+<h1>Create Note</h1>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label>Title</label>
+        <input asp-for="Title" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Description</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Save</button>
+    <a asp-action="Index" class="btn btn-secondary mt-2">Back</a>
+</form>
