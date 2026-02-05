@@ -3,9 +3,9 @@ using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Services.Events;
 using Nop.Services.Notes;
+using Nop.Web.Areas.Admin.Infrastructure;
 using Nop.Web.Framework.Events;
 using Nop.Web.Framework.Infrastructure.Extensions;
-using Nop.Web.Infrastructure;
 
 namespace Nop.Web;
 

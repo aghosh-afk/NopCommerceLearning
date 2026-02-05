@@ -9,8 +9,8 @@ namespace Nop.Services.Notes;
 
 public interface ISimpleNoteService
 {
-    SimpleNote GetById(int id);
     IQueryable<SimpleNote> GetAll();
+    SimpleNote GetById(int id);
     void Insert(SimpleNote note);
     void Update(SimpleNote note);
     void Delete(SimpleNote note);
