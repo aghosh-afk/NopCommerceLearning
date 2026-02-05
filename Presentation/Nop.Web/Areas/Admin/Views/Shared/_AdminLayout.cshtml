@@ -311,6 +311,7 @@
             </script>
         </text>
     }
+    @RenderSection("Scripts", required: false)
     @NopHtml.GenerateScripts(ResourceLocation.Footer)
     @NopHtml.GenerateInlineScripts(ResourceLocation.Footer)
 </body>
