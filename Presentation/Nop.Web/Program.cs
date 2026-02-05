@@ -43,7 +43,7 @@ public partial class Program
         //add services to the application and configure service provider
         builder.Services.ConfigureApplicationServices(builder);
 
-        builder.Services.AddScoped<IConsumer<AdminMenuCreatedEvent>, AdminMenuConsumer>();
+        //builder.Services.AddScoped<IConsumer<AdminMenuCreatedEvent>, AdminMenuConsumer>();
         builder.Services.AddScoped<ISimpleNoteService, SimpleNoteService>();
 
 
