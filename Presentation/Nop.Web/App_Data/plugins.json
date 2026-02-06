@@ -104,11 +104,20 @@
       "Version": "4.90.4"
     },
     {
-      "SystemName": "ExternalAuth.Facebook",
-      "Version": "4.90.3"
+      "SystemName": "Misc.AzureBlob",
+      "Version": "4.90.1"
+    },
+    {
+      "SystemName": "Misc.CloudflareImages",
+      "Version": "4.90.1"
     }
   ],
   "PluginNamesToUninstall": [],
   "PluginNamesToDelete": [],
-  "PluginNamesToInstall": []
+  "PluginNamesToInstall": [
+    {
+      "Item1": "Misc.CustomerReminder",
+      "Item2": "7519bddf-b1a0-4b3d-8818-8bab1d048284"
+    }
+  ]
 }
