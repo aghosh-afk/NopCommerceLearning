@@ -36,6 +36,7 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
             if (template == null)
                 return;
 
+            // Store name
             var store = _storeService.GetAllStores().FirstOrDefault();
             var storeName = store?.Name ?? "Store";
 
@@ -45,9 +46,12 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
 
             var fromEmail = emailAccount?.Email ?? "admin@store.com";
             var fromName = emailAccount?.DisplayName ?? storeName;
+            var emailAccountId = emailAccount?.Id ?? 0;
 
+            // Customer full name
             var customerFullName = $"{customer.FirstName} {customer.LastName}";
 
+            // Replace tokens
             var body = template.Body
                 .Replace("%Customer.FullName%", customerFullName)
                 .Replace("%Store.Name%", storeName)
@@ -58,6 +62,7 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
             var subject = template.Subject
                 .Replace("%CustomerReminder.Title%", reminder.ReminderTitle);
 
+            // Queue email
             var queuedEmail = new QueuedEmail
             {
                 From = fromEmail,
@@ -75,5 +80,7 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
 
             _queuedEmailRepository.Insert(queuedEmail);
         }
+
+
     }
 }

@@ -1,25 +1,52 @@
-﻿@model Nop.Web.Areas.Admin.Models.Notes.SimpleNoteModel
+﻿@model Nop.Web.Areas.Admin.Models.SimpleNote.SimpleNoteModel
+@using Nop.Web.Framework
+@using Nop.Web.Framework.Mvc
+@{
+    ViewData["Title"] = T("Edit");
+}
 
-<h1>Edit Note</h1>
+<h1 class="page-title">@T("Edit")</h1>
 
-<form asp-action="Edit" method="post">
+<form asp-action="Edit" method="post" class="form-horizontal">
     <input type="hidden" asp-for="Id" />
 
-    <div class="form-group">
-        <label>Title</label>
-        <input asp-for="Title" class="form-control" />
-    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">@T("General")</div>
+        <div class="panel-body">
+            <!-- Title -->
+            <div class="form-group row">
+                <label class="col-md-2 control-label">@T("Title")</label>
+                <div class="col-md-10">
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+            </div>
 
-    <div class="form-group">
-        <label>Description</label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-    </div>
+            <!-- Description -->
+            <div class="form-group row">
+                <label class="col-md-2 control-label">@T("Description")</label>
+                <div class="col-md-10">
+                    <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
 
-    <div class="form-group">
-        <label>Created On</label>
-        <input asp-for="CreatedOnUtc" class="form-control" readonly />
-    </div>
+            <!-- CreatedOn (readonly) -->
+            <div class="form-group row">
+                <label class="col-md-2 control-label">@T("CreatedOn")</label>
+                <div class="col-md-10">
+                    <input asp-for="CreatedOnUtc" class="form-control" readonly />
+                </div>
+            </div>
+        </div>
 
-    <button type="submit" class="btn btn-primary mt-2">Update</button>
-    <a asp-action="Index" class="btn btn-secondary mt-2">Back</a>
+        <div class="panel-footer">
+            <button type="submit" class="btn btn-primary">@T("Save")</button>
+            <a href="@Url.Action("Index")" class="btn btn-secondary">@T("Cancel")</a>
+        </div>
+    </div>
 </form>
+
+@* @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+} *@

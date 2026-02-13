@@ -10,7 +10,7 @@ using static LinqToDB.Reflection.Methods.LinqToDB;
 
 namespace Nop.Data.Migrations.Installation;
 
-[NopUpdateMigration("2026-02-03 12:30:00", "4.90", UpdateMigrationType.Data)]
+[NopMigration("2026-02-03 12:30:00", "4.90", UpdateMigrationType.Data,MigrationProcessType.Update)]
 public class CreateSimpleNoteTable : Migration
 {
     public override void Up()

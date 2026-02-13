@@ -1,33 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Nop.Core.Domain.Notes;
 using Nop.Data;
 
-namespace Nop.Services.Notes;
-
-public class SimpleNoteService : ISimpleNoteService
+namespace Nop.Services.Notes
 {
-    private readonly IRepository<SimpleNote> _noteRepository;
-
-    public SimpleNoteService(IRepository<SimpleNote> noteRepository)
+    public class SimpleNoteService : ISimpleNoteService
     {
-        _noteRepository = noteRepository;
+        private readonly IRepository<SimpleNote> _noteRepo;
+
+        public SimpleNoteService(IRepository<SimpleNote> noteRepo)
+        {
+            _noteRepo = noteRepo;
+        }
+
+        public IQueryable<SimpleNote> GetAll() => _noteRepo.Table;
+
+        public SimpleNote GetById(int id) => _noteRepo.GetById(id);
+
+        public void Insert(SimpleNote note) => _noteRepo.Insert(note);
+
+        public void Update(SimpleNote note) => _noteRepo.Update(note);
+
+        public void Delete(SimpleNote note) => _noteRepo.Delete(note);
     }
-
-    public SimpleNote GetById(int id) => _noteRepository.GetById(id);
-
-    public IQueryable<SimpleNote> GetAll() => _noteRepository.Table;
-
-    public void Insert(SimpleNote note)
-    {
-        note.CreatedOnUtc = DateTime.UtcNow;
-        _noteRepository.Insert(note);
-    }
-
-    public void Update(SimpleNote note) => _noteRepository.Update(note);
-
-    public void Delete(SimpleNote note) => _noteRepository.Delete(note);
 }

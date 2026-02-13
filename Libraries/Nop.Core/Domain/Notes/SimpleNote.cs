@@ -10,5 +10,5 @@ public class SimpleNote : BaseEntity
 {
     public string Title { get; set; }
     public string Description { get; set; }
-    public DateTime CreatedOnUtc { get; set; }
+    public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
 }

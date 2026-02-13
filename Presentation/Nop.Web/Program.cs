@@ -3,9 +3,9 @@ using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Services.Events;
 using Nop.Services.Notes;
+using Nop.Web.Areas.Admin.Infrastructure;
 using Nop.Web.Framework.Events;
 using Nop.Web.Framework.Infrastructure.Extensions;
-using Nop.Web.Infrastructure;
 
 namespace Nop.Web;
 
@@ -43,7 +43,7 @@ public partial class Program
         //add services to the application and configure service provider
         builder.Services.ConfigureApplicationServices(builder);
 
-        builder.Services.AddScoped<IConsumer<AdminMenuCreatedEvent>, AdminMenuConsumer>();
+        //builder.Services.AddScoped<IConsumer<AdminMenuCreatedEvent>, AdminMenuConsumer>();
         builder.Services.AddScoped<ISimpleNoteService, SimpleNoteService>();
 
 

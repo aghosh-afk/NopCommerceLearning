@@ -1,0 +1,59 @@
+﻿@model IList<Nop.Plugin.Misc.CustomerReminder.Data.CustomerReminderRecord>
+
+@{
+    Layout = "_AdminLayout";
+}
+
+<h1>Customer Reminders</h1>
+
+<a href="@Url.Action("Create", "CustomerReminder", new { area = "Admin" })"
+   class="btn btn-primary mb-2">
+    Create New
+</a>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>CustomerId</th>
+            <th>Title</th>
+            <th>Message</th>
+            <th>Reminder Date</th>
+            <th>Sent</th>
+            <th>Created On</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.CustomerId</td>
+                    <td>@item.ReminderTitle</td>
+                    <td>@item.ReminderMessage</td>
+                    <td>@item.ReminderDate</td>
+                    <td>@item.IsSent</td>
+                    <td>@item.CreatedOnUtc</td>
+                    <td>
+                        <a href="@Url.Action("Edit", new { id = item.Id })"
+                           class="btn btn-warning btn-sm">Edit</a>
+
+                        <a href="@Url.Action("Delete", new { id = item.Id })"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Are you sure?');">Delete</a>
+                    </td>
+                </tr>
+            }
+
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    No reminders found.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

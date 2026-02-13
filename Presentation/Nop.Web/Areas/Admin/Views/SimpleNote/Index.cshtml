@@ -1,38 +1,347 @@
-﻿@model IEnumerable<Nop.Web.Areas.Admin.Models.Notes.SimpleNoteModel>
+﻿@* 
 
-<h1>Simple Notes</h1>
 
-<a class="btn btn-primary" asp-action="Create">Create New</a>
+@model Nop.Web.Areas.Admin.Models.SimpleNote.SimpleNoteSearchModel
+@using Nop.Web.Framework
+@using Nop.Web.Framework.Mvc
+@{
+    ViewData["Title"] = T("Admin.SimpleNote.List");
+}
 
-<table class="table table-bordered mt-3">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Created On</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var note in Model)
-        {
-            <tr>
-                <td>@note.Id</td>
-                <td>@note.Title</td>
-                <td>@note.Description</td>
-                <td>@note.CreatedOnUtc</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@note.Id" class="btn btn-secondary btn-sm">Edit</a>
+<h1 class="page-title">@T("Admin.SimpleNote.List")</h1>
 
-                    <form asp-action="Delete" asp-route-id="@note.Id" method="post" style="display:inline;">
-                        <button class="btn btn-danger btn-sm"
-                                onclick="return confirm('Delete this note?');">
-                            Delete
-                        </button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="row">
+    <div class="col-md-12">
+        <!-- Search Panel -->
+        <div class="panel panel-default">
+            <div class="panel-heading">@T("Admin.Search")</div>
+            <div class="panel-body">
+                <form id="searchForm" class="form-inline" method="post">
+                    <div class="form-group mr-2">
+                        <label>@T("Admin.SimpleNote.SearchTitle")</label>
+                        <input type="text" name="SearchTitle" value="@Model.SearchTitle" class="form-control ml-1" />
+                    </div>
+                    <div class="form-group mr-2">
+                        <label>@T("Admin.SimpleNote.SearchDate")</label>
+                        <input type="date" name="SearchDate" value="@(Model.SearchDate?.ToString("yyyy-MM-dd"))" class="form-control ml-1" />
+                    </div>
+                    <button type="submit" class="btn btn-primary mr-1">@T("Admin.Search")</button>
+                    <a href="@Url.Action("Index", "SimpleNote", new { area = "Admin" })" class="btn btn-secondary">@T("Admin.Clear")</a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Create Button -->
+        <div class="text-right mb-2">
+            <a class="btn btn-success" href="@Url.Action("Create", "SimpleNote", new { area = "Admin" })">
+                <i class="fa fa-plus"></i> @T("Admin.SimpleNote.Create")
+            </a>
+        </div>
+
+        <!-- Notes Table -->
+        <table class="table table-bordered table-hover" id="notes-table">
+            <thead>
+                <tr>
+                    <th>@T("Admin.Id")</th>
+                    <th>@T("Admin.SimpleNote.Title")</th>
+                    <th>@T("Admin.SimpleNote.Description")</th>
+                    <th>@T("Admin.SimpleNote.CreatedOn")</th>
+                    <th>@T("Admin.Actions")</th>
+                </tr>
+            </thead>
+            <tbody id="notes-table-body">
+                <!-- Rows loaded via AJAX -->
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="text-center mt-2">
+            <nav>
+                <ul class="pagination" id="notes-pagination"></ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+            var currentPage = 1;
+            var pageSize = 10;
+
+            loadNotes();
+
+            // Search form submit
+            $("#searchForm").submit(function (e) {
+                e.preventDefault();
+                loadNotes(1); // reset to page 1 on search
+            });
+
+            function loadNotes(page = 1) {
+                currentPage = page;
+                var formData = $("#searchForm").serialize() + "&Page=" + page + "&PageSize=" + pageSize;
+
+                $.post('@Url.Action("List", "SimpleNote", new { area = "Admin" })', formData, function (data) {
+                    var tbody = $("#notes-table-body");
+                    tbody.empty();
+
+                    if (!data.Notes || data.Notes.length === 0) {
+                        tbody.append('<tr><td colspan="5" class="text-center">@T("Admin.NoRecordsFound")</td></tr>');
+                        $("#notes-pagination").empty();
+                        return;
+                    }
+
+                    // Build table rows
+                    $.each(data.Notes, function (i, note) {
+                        var row = '<tr>' +
+                            '<td>' + note.Id + '</td>' +
+                            '<td>' + note.Title + '</td>' +
+                            '<td>' + note.Description + '</td>' +
+                            '<td>' + formatDate(note.CreatedOnUtc) + '</td>' +
+                            '<td>' +
+                                '<a class="btn btn-primary btn-sm" href="@Url.Action("Edit", "SimpleNote", new { area = "Admin" })/' + note.Id + '">' +
+                                    '<i class="fa fa-edit"></i> @T("Admin.Edit")</a> ' +
+                                '<a class="btn btn-danger btn-sm" href="javascript:void(0);" onclick="deleteNote(' + note.Id + ')">' +
+                                    '<i class="fa fa-trash"></i> @T("Admin.Delete")</a>' +
+                            '</td>' +
+                            '</tr>';
+                        tbody.append(row);
+                    });
+
+                    // ----------------------------
+                    // Pagination
+                    // ----------------------------
+                    var totalPages = Math.ceil(data.TotalCount / data.PageSize);
+                    var pagination = $("#notes-pagination");
+                    pagination.empty();
+
+                    if (totalPages > 1) {
+                        // Prev button
+                        var prevClass = (currentPage === 1) ? "page-item disabled" : "page-item";
+                        pagination.append('<li class="' + prevClass + '" data-page="' + (currentPage - 1) + '"><a class="page-link" href="javascript:void(0);">Prev</a></li>');
+
+                        // Page numbers
+                        for (var i = 1; i <= totalPages; i++) {
+                            var liClass = (i === currentPage) ? "page-item active" : "page-item";
+                            pagination.append('<li class="' + liClass + '" data-page="' + i + '"><a class="page-link" href="javascript:void(0);">' + i + '</a></li>');
+                        }
+
+                        // Next button
+                        var nextClass = (currentPage === totalPages) ? "page-item disabled" : "page-item";
+                        pagination.append('<li class="' + nextClass + '" data-page="' + (currentPage + 1) + '"><a class="page-link" href="javascript:void(0);">Next</a></li>');
+
+                        // Delegated click handler for all pagination items
+                        pagination.off('click', 'li[data-page]').on('click', 'li[data-page]', function () {
+                            var page = $(this).data('page');
+                            if (page >= 1 && page <= totalPages) {
+                                loadNotes(page);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Delete note
+            window.deleteNote = function (id) {
+                if (confirm('@T("Admin.AreYouSure")')) {
+                    $.post('@Url.Action("Delete", "SimpleNote", new { area = "Admin" })',
+                    {
+                        id: id,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    }, function (response) {
+                        if (response.success) {
+                            loadNotes(currentPage);
+                            alert('@T("Admin.Deleted")');
+                        } else {
+                            alert(response.message || 'Error deleting note');
+                        }
+                    });
+                }
+            };
+
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                var date = new Date(dateStr);
+                return date.getFullYear() + '-' +
+                    ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+                    ('0' + date.getDate()).slice(-2) + ' ' +
+                    ('0' + date.getHours()).slice(-2) + ':' +
+                    ('0' + date.getMinutes()).slice(-2);
+            }
+        });
+    </script>
+} *@
+
+
+@model Nop.Web.Areas.Admin.Models.SimpleNote.SimpleNoteSearchModel
+@using Nop.Web.Framework
+@using Nop.Web.Framework.Mvc
+@{
+    ViewData["Title"] = T("Admin.SimpleNote.List");
+}
+
+<h1 class="page-title">@T("Admin.SimpleNote.List")</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <!-- Search Panel -->
+        <div class="panel panel-default">
+            <div class="panel-heading">@T("Admin.Search")</div>
+            <div class="panel-body">
+                <form id="searchForm" class="form-inline" method="post">
+                    <!-- Title filter -->
+                    <div class="form-group mr-2">
+                        <label>@T("Admin.SimpleNote.SearchTitle")</label>
+                        <input type="text" name="SearchTitle" value="@Model.SearchTitle" class="form-control ml-1" placeholder="Enter title..." />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mr-1">@T("Admin.Search")</button>
+                    <a href="@Url.Action("Index", "SimpleNote", new { area = "Admin" })" class="btn btn-secondary">@T("Admin.Clear")</a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Create Button -->
+        <div class="text-right mb-2">
+            <a class="btn btn-success" href="@Url.Action("Create", "SimpleNote", new { area = "Admin" })">
+                <i class="fa fa-plus"></i> @T("Admin.SimpleNote.Create")
+            </a>
+        </div>
+
+        <!-- Notes Table -->
+        <table class="table table-bordered table-hover" id="notes-table">
+            <thead>
+                <tr>
+                    <th>@T("Admin.Id")</th>
+                    <th>@T("Admin.SimpleNote.Title")</th>
+                    <th>@T("Admin.SimpleNote.Description")</th>
+                    <th>@T("Admin.SimpleNote.CreatedOn")</th>
+                    <th>@T("Admin.Actions")</th>
+                </tr>
+            </thead>
+            <tbody id="notes-table-body">
+                <!-- Rows loaded via AJAX -->
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="text-center mt-2">
+            <nav>
+                <ul class="pagination" id="notes-pagination"></ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+            var currentPage = 1;
+            var pageSize = 10;
+
+            // Load notes initially
+            loadNotes();
+
+            // Trigger search by title
+            $("#searchForm").submit(function (e) {
+                e.preventDefault();
+                loadNotes(1); // always start from page 1 on search
+            });
+
+            function loadNotes(page = 1) {
+                currentPage = page;
+
+                // Send search filters to server
+                var formData = $("#searchForm").serialize() + "&Page=" + page + "&PageSize=" + pageSize;
+
+                $.post('@Url.Action("List", "SimpleNote", new { area = "Admin" })', formData, function (data) {
+                    var tbody = $("#notes-table-body");
+                    tbody.empty();
+
+                    if (!data.Notes || data.Notes.length === 0) {
+                        tbody.append('<tr><td colspan="5" class="text-center">@T("Admin.NoRecordsFound")</td></tr>');
+                        $("#notes-pagination").empty();
+                        return;
+                    }
+
+                    // Build table rows
+                    $.each(data.Notes, function (i, note) {
+                        var row = '<tr>' +
+                            '<td>' + note.Id + '</td>' +
+                            '<td>' + note.Title + '</td>' +
+                            '<td>' + note.Description + '</td>' +
+                            '<td>' + formatDate(note.CreatedOnUtc) + '</td>' +
+                            '<td>' +
+                                '<a class="btn btn-primary btn-sm" href="@Url.Action("Edit", "SimpleNote", new { area = "Admin" })/' + note.Id + '">' +
+                                    '<i class="fa fa-edit"></i> @T("Admin.Edit")</a> ' +
+                                '<a class="btn btn-danger btn-sm" href="javascript:void(0);" onclick="deleteNote(' + note.Id + ')">' +
+                                    '<i class="fa fa-trash"></i> @T("Admin.Delete")</a>' +
+                            '</td>' +
+                            '</tr>';
+                        tbody.append(row);
+                    });
+
+                    // ----------------------------
+                    // Pagination
+                    // ----------------------------
+                    var totalPages = Math.ceil(data.TotalCount / data.PageSize);
+                    var pagination = $("#notes-pagination");
+                    pagination.empty();
+
+                    if (totalPages > 1) {
+                        // Prev button
+                        var prevClass = (currentPage === 1) ? "page-item disabled" : "page-item";
+                        pagination.append('<li class="' + prevClass + '" data-page="' + (currentPage - 1) + '"><a class="page-link" href="javascript:void(0);">Prev</a></li>');
+
+                        // Page numbers
+                        for (var i = 1; i <= totalPages; i++) {
+                            var liClass = (i === currentPage) ? "page-item active" : "page-item";
+                            pagination.append('<li class="' + liClass + '" data-page="' + i + '"><a class="page-link" href="javascript:void(0);">' + i + '</a></li>');
+                        }
+
+                        // Next button
+                        var nextClass = (currentPage === totalPages) ? "page-item disabled" : "page-item";
+                        pagination.append('<li class="' + nextClass + '" data-page="' + (currentPage + 1) + '"><a class="page-link" href="javascript:void(0);">Next</a></li>');
+
+                        // Delegated click for pagination
+                        pagination.off('click', 'li[data-page]').on('click', 'li[data-page]', function () {
+                            var page = $(this).data('page');
+                            if (page >= 1 && page <= totalPages) {
+                                loadNotes(page);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Delete note
+            window.deleteNote = function (id) {
+                if (confirm('@T("Admin.AreYouSure")')) {
+                    $.post('@Url.Action("Delete", "SimpleNote", new { area = "Admin" })',
+                    {
+                        id: id,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    }, function (response) {
+                        if (response.success) {
+                            loadNotes(currentPage);
+                            alert('@T("Admin.Deleted")');
+                        } else {
+                            alert(response.message || 'Error deleting note');
+                        }
+                    });
+                }
+            };
+
+            // Format date
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                var date = new Date(dateStr);
+                return date.getFullYear() + '-' +
+                    ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+                    ('0' + date.getDate()).slice(-2) + ' ' +
+                    ('0' + date.getHours()).slice(-2) + ':' +
+                    ('0' + date.getMinutes()).slice(-2);
+            }
+        });
+    </script>
+}
