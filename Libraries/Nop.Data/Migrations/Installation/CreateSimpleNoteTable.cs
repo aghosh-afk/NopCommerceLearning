@@ -16,11 +16,14 @@ public class CreateSimpleNoteTable : Migration
     public override void Up()
     {
         // Fix: Call Create.Table and use SimpleNoteMap to map the entity
-        Create.Table(nameof(SimpleNote))
+        if (!Schema.Table("SimpleNote").Exists())
+        {
+            Create.Table(nameof(SimpleNote))
             .WithColumn(nameof(SimpleNote.Id)).AsInt32().PrimaryKey().Identity()
             .WithColumn(nameof(SimpleNote.Title)).AsString(255).NotNullable()
             .WithColumn(nameof(SimpleNote.Description)).AsString(int.MaxValue).Nullable()
             .WithColumn(nameof(SimpleNote.CreatedOnUtc)).AsDateTime().NotNullable();
+        }
     }
 
     public override void Down()
