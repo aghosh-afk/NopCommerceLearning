@@ -793,17 +793,8 @@ public partial class AdminMenu : IAdminMenu
                         }
                     }
                 },
-                new ()
-                {
-                    SystemName = "SimpleNotes",
-                    Title = await _localizationService.GetResourceAsync("Admin.SimpleNote"),
-                    //PermissionNames = new List<string> { },
-                    Url = GetMenuItemUrl("SimpleNote", "Index"),
-                    IconClass = "fa fa-sticky-note",
-                    Visible = true
-                },
-            //system
-            new()
+                //system
+                new()
                 {
                     SystemName = "System",
                     Title = await _localizationService.GetResourceAsync("Admin.System"),
