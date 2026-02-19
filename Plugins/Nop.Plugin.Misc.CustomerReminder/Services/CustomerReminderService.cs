@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Nop.Core;
 using Nop.Data;
 using Nop.Plugin.Misc.CustomerReminder.Data;
 using Nop.Services.Customers;
@@ -23,10 +24,31 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
             _emailService = emailService;
         }
 
-        public async Task<IList<CustomerReminderRecord>> GetAllAsync()
+        public async Task<IPagedList<CustomerReminderRecord>> GetAllPagedAsync(
+    int pageIndex,
+    int pageSize,
+    int? customerId = null,
+    bool? isSent = null,
+    DateTime? fromDate = null,
+    DateTime? toDate = null)
         {
-            return await _repository.Table.OrderByDescending(x => x.CreatedOnUtc).ToListAsync();
+            var query = _repository.Table;
+
+            if (customerId.HasValue)
+                query = query.Where(x => x.CustomerId == customerId.Value);
+
+            if (isSent.HasValue)
+                query = query.Where(x => x.IsSent == isSent.Value);
+
+            if (fromDate.HasValue)
+                query = query.Where(x => x.ReminderDate >= fromDate.Value);
+
+            if (toDate.HasValue)
+                query = query.Where(x => x.ReminderDate <= toDate.Value);
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
         }
+
 
         public async Task<CustomerReminderRecord?> GetByIdAsync(int id)
         {

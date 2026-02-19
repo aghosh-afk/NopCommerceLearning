@@ -1,7 +1,7 @@
 ﻿using FluentMigrator;
 using Nop.Data.Migrations;
 
-namespace Nop.Plugin.Misc.CustomerReminder.Migrations
+namespace Nop.Plugin.Misc.CustomerReminder.Data.Migrations
 {
     [NopMigration("2026/02/06 15:30:00", "CustomerReminderRecord schema", MigrationProcessType.Installation)]
     public class CustomerReminderMigration : AutoReversingMigration

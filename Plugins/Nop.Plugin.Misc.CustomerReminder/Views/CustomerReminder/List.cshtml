@@ -1,59 +1,201 @@
-﻿@model IList<Nop.Plugin.Misc.CustomerReminder.Data.CustomerReminderRecord>
+﻿@model Nop.Plugin.Misc.CustomerReminder.Models.CustomerReminderSearchModel
 
+@using Nop.Web.Framework.Models.DataTables
+@using Nop.Web.Framework
+@using Microsoft.AspNetCore.Routing
 @{
     Layout = "_AdminLayout";
 }
 
-<h1>Customer Reminders</h1>
+<form id="antiForgeryForm">
+    @Html.AntiForgeryToken()
+</form>
 
-<a href="@Url.Action("Create", "CustomerReminder", new { area = "Admin" })"
-   class="btn btn-primary mb-2">
-    Create New
-</a>
+<div class="content-header clearfix">
+    <h1 class="float-left">Customer Reminders</h1>
+    <div class="float-right">
+        <a href="@Url.Action("Create", "CustomerReminder", new { area = "Admin" })" class="btn btn-success">
+            <i class="fas fa-plus"></i> Create
+        </a>
+    </div>
+</div>
 
-<table class="table table-bordered table-hover">
-    <thead>
-        <tr>
-            <th>CustomerId</th>
-            <th>Title</th>
-            <th>Message</th>
-            <th>Reminder Date</th>
-            <th>Sent</th>
-            <th>Created On</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
-        {
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.CustomerId</td>
-                    <td>@item.ReminderTitle</td>
-                    <td>@item.ReminderMessage</td>
-                    <td>@item.ReminderDate</td>
-                    <td>@item.IsSent</td>
-                    <td>@item.CreatedOnUtc</td>
-                    <td>
-                        <a href="@Url.Action("Edit", new { id = item.Id })"
-                           class="btn btn-warning btn-sm">Edit</a>
+<section class="content">
+    <div class="container-fluid">
 
-                        <a href="@Url.Action("Delete", new { id = item.Id })"
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('Are you sure?');">Delete</a>
-                    </td>
-                </tr>
+        <!-- Search Filters -->
+        <div class="card card-default card-search">
+            <div class="card-body">
+                <div class="row">
+
+                    <!-- Customer Kendo DropDown -->
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="CustomerId"></label>
+                            <input id="CustomerId" name="CustomerId" style="width:100%;" />
+                        </div>
+                    </div>
+
+                    <!-- IsSent -->
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="IsSent"></label>
+                            <select asp-for="IsSent" class="form-control" name="IsSent">
+                                <option value="">All</option>
+                                <option value="true">Sent</option>
+                                <option value="false">Not Sent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- FromDate -->
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="FromDate"></label>
+                            <input asp-for="FromDate" class="form-control" name="FromDate" />
+                        </div>
+                    </div>
+
+                    <!-- ToDate -->
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="ToDate"></label>
+                            <input asp-for="ToDate" class="form-control" name="ToDate" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-md-12 text-center">
+                        <button type="button" id="search-reminders" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Placeholder -->
+        <div class="card card-default">
+            <div class="card-body">
+                <div id="customerReminderGridContainer"></div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+@section Scripts {
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        // -----------------------------
+        // Kendo DropDownList for Customer
+        // -----------------------------
+        $("#CustomerId").kendoDropDownList({
+            optionLabel: "Select Customer...",
+            dataTextField: "FullName",
+            dataValueField: "Id",
+            filter: "contains",
+            minLength: 1,
+            autoBind: false,
+            dataSource: {
+                transport: {
+                    read: {
+                        url: '@Url.Action("GetCustomers", "CustomerReminder", new { area = "Admin" })',
+                        dataType: "json"
+                    },
+                    parameterMap: function (data, type) {
+                        var text = "";
+                        if (data.filter && data.filter.filters && data.filter.filters.length > 0) {
+                            text = data.filter.filters[0].value;
+                        }
+                        return { text: text };
+                    }
+                },
+                serverFiltering: true
             }
+        });
 
+        // -----------------------------
+        // Initialize DataTable
+        // -----------------------------
+        var dataTableName = "customerReminderGrid";
+
+        function initCustomerReminderGrid() {
+            $("#customerReminderGridContainer").html(""); // Clear placeholder
+            var tableHtml = '<table id="' + dataTableName + '" class="table table-bordered table-hover"></table>';
+            $("#customerReminderGridContainer").append(tableHtml);
+
+            $("#" + dataTableName).DataTable({
+                ajax: {
+                    url: '@Url.Action("List", "CustomerReminder", new { area = "Admin" })',
+                    type: "POST",
+                    data: function (d) {
+                        var customerId = $("#CustomerId").val();
+                        d.CustomerId = (customerId && customerId !== "0") ? customerId : null;
+
+                        var isSent = $("#IsSent").val();
+                        d.IsSent = (isSent !== "") ? isSent : null;
+
+                        var fromDate = $("#FromDate").val();
+                        d.FromDate = fromDate ? fromDate : null;
+
+                        var toDate = $("#ToDate").val();
+                        d.ToDate = toDate ? toDate : null;
+
+                        d.__RequestVerificationToken = 
+                        $('input[name="__RequestVerificationToken"]').val();
+                    }
+                },
+                serverSide: true,
+                processing: true,
+                pageLength: @Model.PageSize,
+                lengthMenu: @Html.Raw(Json.Serialize(Model.AvailablePageSizes)),
+                columns: [
+                    { data: "Id", title: "Id", width: "50px" },
+                    { data: "CustomerId", title: "Customer Id" },
+                    { data: "ReminderTitle", title: "Title" },
+                    { data: "ReminderDate", title: "Reminder Date" },
+                    { 
+                        data: "IsSent", 
+                        title: "Sent", 
+                        width: "100px", 
+                        className: "text-center",
+                        render: function(data) { return data ? "Yes" : "No"; }
+                    },
+                    {
+                        data: "Id",
+                        title: "Actions",
+                        width: "150px",
+                        className: "text-center",
+                        orderable: false,
+                        render: function (data, type, row) {
+                            return `
+                                <a href='@Url.Action("Edit", "CustomerReminder", new { area = "Admin" })/${data}' class='btn btn-sm btn-primary'>
+                                    <i class='fas fa-edit'></i>
+                                </a>
+                                <a href='@Url.Action("Delete", "CustomerReminder", new { area = "Admin" })/${data}' class='btn btn-sm btn-danger'>
+                                    <i class='fas fa-trash'></i>
+                                </a>
+                            `;
+                        }
+                    }
+                ]
+            });
         }
-        else
-        {
-            <tr>
-                <td colspan="6" class="text-center text-muted">
-                    No reminders found.
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+
+        // Load grid by default
+        initCustomerReminderGrid();
+
+        // -----------------------------
+        // Search Button
+        // -----------------------------
+        $("#search-reminders").click(function () {
+            $("#" + dataTableName).DataTable().ajax.reload();
+        });
+
+    });
+</script>
+}

@@ -1,7 +1,7 @@
 ﻿using FluentMigrator;
 using Nop.Data.Migrations;
 
-namespace Nop.Plugin.Misc.CustomerReminder.Migrations
+namespace Nop.Plugin.Misc.CustomerReminder.Data.Migrations
 {
     [NopMigration("2026/02/06 12:00:00:0000000", "Misc.CustomerReminder: Add message template")]
     public class AddCustomerReminderMessageTemplate : Migration

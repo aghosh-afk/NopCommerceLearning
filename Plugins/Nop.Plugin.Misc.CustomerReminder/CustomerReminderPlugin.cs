@@ -30,7 +30,6 @@ namespace Nop.Plugin.Misc.CustomerReminder
 
         public override async Task InstallAsync()
         {
-            // ✅ DO NOT RUN MIGRATION HERE — nopCommerce runs it automatically
 
             var templates = await _messageTemplateService.GetAllMessageTemplatesAsync(0);
 

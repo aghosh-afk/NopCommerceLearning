@@ -47,6 +47,8 @@
     @*Insert favicon and app icons head code*@
     @await Component.InvokeAsync(typeof(FaviconViewComponent))
 </head>
+@RenderSection("Scripts", required: false)
+
 <body class="hold-transition sidebar-mini layout-fixed control-sidebar-slide-open">
     <div class="throbber">
         <div class="curtain">
