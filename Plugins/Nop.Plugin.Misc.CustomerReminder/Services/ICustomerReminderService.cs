@@ -1,4 +1,5 @@
 ﻿using Nop.Core;
+using Nop.Core.Domain.Customers;
 using Nop.Plugin.Misc.CustomerReminder.Data;
 
 namespace Nop.Plugin.Misc.CustomerReminder.Services
@@ -15,5 +16,6 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
         Task InsertAsync(CustomerReminderRecord record);
         Task UpdateAsync(CustomerReminderRecord record);
         Task DeleteAsync(CustomerReminderRecord record);
+        Task<(IList<Customer> Customers, int TotalCount)> SearchCustomersAsync(string search, int page, int pageSize);
     }
 }

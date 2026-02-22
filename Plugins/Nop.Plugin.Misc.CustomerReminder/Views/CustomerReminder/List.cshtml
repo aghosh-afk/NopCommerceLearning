@@ -98,24 +98,43 @@
             dataTextField: "FullName",
             dataValueField: "Id",
             filter: "contains",
-            minLength: 1,
-            autoBind: false,
+            minLength: 0,
+            autoBind: true, 
+
             dataSource: {
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 10,
+
                 transport: {
                     read: {
-                        url: '@Url.Action("GetCustomers", "CustomerReminder", new { area = "Admin" })',
+                        url: '@Url.Action("CustomerList", "CustomerReminder", new { area = "Admin" })',
+                        type: "POST",
                         dataType: "json"
                     },
-                    parameterMap: function (data, type) {
-                        var text = "";
+                    parameterMap: function (data) {
+                        var searchValue = "";
+
                         if (data.filter && data.filter.filters && data.filter.filters.length > 0) {
-                            text = data.filter.filters[0].value;
+                            searchValue = data.filter.filters[0].value;
                         }
-                        return { text: text };
+
+                        return {
+                            page: data.page || 1,
+                            pageSize: data.pageSize || 10,
+                            search: searchValue,
+                            __RequestVerificationToken:
+                                $('input[name="__RequestVerificationToken"]').val()
+                        };
                     }
                 },
-                serverFiltering: true
+
+                schema: {
+                    data: "Data",
+                    total: "Total"
+                }
             }
+
         });
 
         // -----------------------------
@@ -133,6 +152,7 @@
                     url: '@Url.Action("List", "CustomerReminder", new { area = "Admin" })',
                     type: "POST",
                     data: function (d) {
+
                         var customerId = $("#CustomerId").val();
                         d.CustomerId = (customerId && customerId !== "0") ? customerId : null;
 
@@ -145,8 +165,10 @@
                         var toDate = $("#ToDate").val();
                         d.ToDate = toDate ? toDate : null;
 
-                        d.__RequestVerificationToken = 
-                        $('input[name="__RequestVerificationToken"]').val();
+                        d.__RequestVerificationToken =
+                            $('input[name="__RequestVerificationToken"]').val();
+
+                        return d;
                     }
                 },
                 serverSide: true,

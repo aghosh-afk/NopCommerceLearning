@@ -1,130 +1,138 @@
-﻿@model Nop.Plugin.Misc.CustomerReminder.Data.CustomerReminderRecord
-
-@using Nop.Web.Framework.Models.DataTables
-@using Nop.Web.Framework.Models
-@using Nop.Web.Framework
-@using Nop.Plugin.Misc.CustomerReminder.Models
+﻿@model Nop.Plugin.Misc.CustomerReminder.Models.CustomerReminderModel
 
 @{
-    Layout = "_AdminLayout";
+        Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     ViewBag.PageTitle = "Create Customer Reminder";
 }
 
-<div class="content">
-    <div class="container-fluid">
+<form asp-action="Create"
+      asp-controller="CustomerReminder"
+      asp-area="Admin"
+      method="post"
+      id="customerReminderForm">
 
-        <form asp-action="Create"
-              asp-controller="CustomerReminder"
-              asp-area="Admin"
-              method="post">
+    @Html.AntiForgeryToken()
 
-            @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="float-left">
+            Create Customer Reminder
+        </h1>
+        <div class="float-right">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save
+            </button>
+            <a asp-action="List"
+               asp-controller="CustomerReminder"
+               asp-area="Admin"
+               class="btn btn-secondary">
+                Cancel
+            </a>
+        </div>
+    </div>
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <div class="card">
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card card-default">
                 <div class="card-body">
 
                     <!-- Customer -->
                     <div class="form-group row">
                         <div class="col-md-3">
-                            <label asp-for="CustomerId" class="control-label"></label>
+                            <nop-label asp-for="CustomerId" />
                         </div>
                         <div class="col-md-9">
-                            <input asp-for="CustomerId" id="CustomerId" style="width:100%;" />
-                            <span asp-validation-for="CustomerId" class="text-danger"></span>
+                            <input asp-for="CustomerId"
+                                   id="CustomerId"
+                                   style="width:100%;" />
+                            <span asp-validation-for="CustomerId"></span>
                         </div>
                     </div>
 
-                    <!-- Title -->
+                    <!-- Reminder Title -->
                     <div class="form-group row">
                         <div class="col-md-3">
-                            <label asp-for="ReminderTitle" class="control-label"></label>
+                            <nop-label asp-for="ReminderTitle" />
                         </div>
                         <div class="col-md-9">
-                            <input asp-for="ReminderTitle" class="form-control" />
-                            <span asp-validation-for="ReminderTitle" class="text-danger"></span>
+                            <nop-editor asp-for="ReminderTitle" />
+                            <span asp-validation-for="ReminderTitle"></span>
                         </div>
                     </div>
 
-                    <!-- Message -->
+                    <!-- Reminder Message -->
                     <div class="form-group row">
                         <div class="col-md-3">
-                            <label asp-for="ReminderMessage" class="control-label"></label>
+                            <nop-label asp-for="ReminderMessage" />
                         </div>
                         <div class="col-md-9">
-                            <textarea asp-for="ReminderMessage" class="form-control"></textarea>
-                            <span asp-validation-for="ReminderMessage" class="text-danger"></span>
+                            <nop-editor asp-for="ReminderMessage" />
+                            <span asp-validation-for="ReminderMessage"></span>
                         </div>
                     </div>
 
                     <!-- Reminder Date -->
                     <div class="form-group row">
                         <div class="col-md-3">
-                            <label asp-for="ReminderDate" class="control-label"></label>
+                            <nop-label asp-for="ReminderDate" />
                         </div>
                         <div class="col-md-9">
-                            <input asp-for="ReminderDate"
-                                   type="datetime-local"
-                                   class="form-control" />
-                            <span asp-validation-for="ReminderDate" class="text-danger"></span>
+                            <nop-editor asp-for="ReminderDate" />
+                            <span asp-validation-for="ReminderDate"></span>
                         </div>
                     </div>
 
                 </div>
-
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save
-                    </button>
-
-                    <a asp-action="List"
-                       asp-controller="CustomerReminder"
-                       asp-area="Admin"
-                       class="btn btn-secondary">
-                        Cancel
-                    </a>
-                </div>
             </div>
+        </div>
+    </section>
+</form>
 
-        </form>
-    </div>
-</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
 
-<!-- Kendo ComboBox -->
-<script asp-location="Footer">
-    $(document).ready(function () {
+            // Customer dropdown
+            $("#CustomerId").kendoDropDownList({
+                optionLabel: "Select Customer...",
+                dataTextField: "FullName",
+                dataValueField: "Id",
+                filter: "contains",
+                autoBind: true,
+                minLength: 2,
 
-        $("#CustomerId").kendoComboBox({
-            dataTextField: "name",
-            dataValueField: "id",
-            filter: "contains",
-            minLength: 2,
-            autoBind: false,
-            valuePrimitive: true,
-            placeholder: "Search customer...",
-            dataSource: {
-                transport: {
-                    read: {
-                        url: "@Url.Action("CustomerList", "CustomerReminder", new { area = "Admin" })",
-                        type: "POST",
-                        data: function () {
+                dataSource: {
+                    serverFiltering: true,
+                    serverPaging: true,
+                    pageSize: 10,
+                    transport: {
+                        read: {
+                            url: '@Url.Action("CustomerList", "CustomerReminder", new { area = "Admin" })',
+                            type: "POST",
+                            dataType: "json"
+                        },
+                        parameterMap: function (data) {
+
+                            var searchValue = "";
+                            if (data.filter && data.filter.filters.length > 0) {
+                                searchValue = data.filter.filters[0].value;
+                            }
+
                             return {
-                                search: $("#CustomerId").data("kendoComboBox").text(),
-                                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                                page: data.page || 1,
+                                pageSize: data.pageSize || 10,
+                                search: searchValue,
+                                __RequestVerificationToken:
+                                    $('input[name="__RequestVerificationToken"]').val()
                             };
                         }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total"
                     }
-                },
-                schema: {
-                    data: "Data",
-                    total: "Total"
-                },
-                serverFiltering: true,
-                serverPaging: true,
-                pageSize: 20
-            }
-        });
+                }
+            });
 
-    });
-</script>
+        });
+    </script>
+}

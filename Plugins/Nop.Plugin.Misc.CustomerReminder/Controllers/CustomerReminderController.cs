@@ -6,6 +6,8 @@ using Nop.Plugin.Misc.CustomerReminder.Factories;
 using Nop.Plugin.Misc.CustomerReminder.Models;
 using Nop.Plugin.Misc.CustomerReminder.Services;
 using Nop.Services.Customers;
+using Nop.Services.Helpers;
+using Nop.Services.Messages;
 using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework.Mvc.Filters;
 using Nop.Web.Framework.UI;
@@ -18,12 +20,16 @@ public class CustomerReminderController : BaseAdminController
     private readonly ICustomerReminderService _service;
     private readonly ICustomerService _customerService;
     private readonly ICustomerReminderModelFactory _modelFactory;
+    private readonly INotificationService _notificationService;
+    private readonly IDateTimeHelper _dateTimeHelper;
 
-    public CustomerReminderController( ICustomerReminderService service, ICustomerService customerService, ICustomerReminderModelFactory modelFactory)
+    public CustomerReminderController( ICustomerReminderService service, ICustomerService customerService, ICustomerReminderModelFactory modelFactory, INotificationService notificationService, IDateTimeHelper dateTimeHelper)
     {
         _service = service;
         _customerService = customerService;
         _modelFactory = modelFactory;
+        _notificationService = notificationService;
+        _dateTimeHelper = dateTimeHelper;
     }
 
     public async Task<IActionResult> List()
@@ -34,43 +40,48 @@ public class CustomerReminderController : BaseAdminController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> List(CustomerReminderSearchModel searchModel)
     {
         var model = await _modelFactory
             .PrepareCustomerReminderListModelAsync(searchModel);
 
-        return Json(model);
+        return Json(new
+        {
+            draw = Convert.ToInt32(model.Draw),
+            recordsTotal = model.RecordsTotal,
+            recordsFiltered = model.RecordsFiltered,
+            data = model.Data
+        });
     }
 
-
     [HttpPost]
-    [AuthorizeAdmin]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CustomerList(int page, int pageSize, string search)
     {
-        var customers = await _customerService.GetAllCustomersAsync(
-            email: search,
-            pageIndex: page - 1,
-            pageSize: pageSize
-        );
+        var (customers, total) =
+            await _service.SearchCustomersAsync(search, page, pageSize);
 
         var data = customers.Select(c => new
         {
-            id = c.Id,
-            name = $"{c.FirstName} {c.LastName} ({c.Email})"
+            Id = c.Id,
+            FullName = string.IsNullOrWhiteSpace(c.FirstName + c.LastName)
+                ? c.Email
+                : $"{c.FirstName} {c.LastName} ({c.Email})"
         });
 
         return Json(new
         {
             Data = data,
-            Total = customers.TotalCount
+            Total = total
         });
     }
+
     public IActionResult Create()
     {
-        var model = new CustomerReminderRecord
+        var model = new CustomerReminderModel
         {
-            ReminderDate = DateTime.UtcNow
+            ReminderDate = _dateTimeHelper.ConvertToUtcTime(DateTime.UtcNow)
         };
 
         return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/Create.cshtml", model);
@@ -78,7 +89,7 @@ public class CustomerReminderController : BaseAdminController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(CustomerReminderRecord model)
+    public async Task<IActionResult> Create(CustomerReminderModel model)
     {
         if (!ModelState.IsValid)
             return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/Create.cshtml", model);
@@ -90,11 +101,19 @@ public class CustomerReminderController : BaseAdminController
             return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/Create.cshtml", model);
         }
 
-        model.ReminderDate = model.ReminderDate.ToUniversalTime();
-        model.CreatedOnUtc = DateTime.UtcNow;
-        model.IsSent = false;
+        var entity = new CustomerReminderRecord
+        {
+            CustomerId = model.CustomerId,
+            ReminderTitle = model.ReminderTitle,
+            ReminderMessage = model.ReminderMessage,
+            ReminderDate = _dateTimeHelper.ConvertToUtcTime(model.ReminderDate),
+            CreatedOnUtc = DateTime.UtcNow,
+            IsSent = false
+        };
 
-        await _service.InsertAsync(model);
+        await _service.InsertAsync(entity);
+
+        _notificationService.SuccessNotification("Customer reminder created successfully.");
 
         return RedirectToAction("List", "CustomerReminder", new { area = "Admin" });
     }
@@ -129,33 +148,5 @@ public class CustomerReminderController : BaseAdminController
 
         return RedirectToAction("List", "CustomerReminder", new { area = "Admin" });
     }
-
-    [HttpGet]
-    public async Task<IActionResult> GetCustomers(string text)
-    {
-        // Fetch customers
-        var customers = await _customerService.GetAllCustomersAsync(
-            email: null,
-            username: null,
-            firstName: text,
-            lastName: text,
-            pageIndex: 0,
-            pageSize: 50);
-
-        // Prepare result with "Select Customer..." at top
-        var result = new List<object>
-    {
-        new { Id = 0, FullName = "Select Customer..." } // default option
-    };
-
-        result.AddRange(customers.Select(c => new
-        {
-            Id = c.Id,
-            FullName = $"{c.FirstName} {c.LastName}"
-        }));
-
-        return Json(result);
-    }
-
 
 }
