@@ -1,10 +1,6 @@
 ﻿using Autofac.Extensions.DependencyInjection;
 using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
-using Nop.Services.Events;
-using Nop.Services.Notes;
-using Nop.Web.Areas.Admin.Infrastructure;
-using Nop.Web.Framework.Events;
 using Nop.Web.Framework.Infrastructure.Extensions;
 
 namespace Nop.Web;
@@ -42,10 +38,6 @@ public partial class Program
 
         //add services to the application and configure service provider
         builder.Services.ConfigureApplicationServices(builder);
-
-        //builder.Services.AddScoped<IConsumer<AdminMenuCreatedEvent>, AdminMenuConsumer>();
-        builder.Services.AddScoped<ISimpleNoteService, SimpleNoteService>();
-
 
         var app = builder.Build();
 

@@ -1,0 +1,101 @@
+﻿@model Nop.Plugin.Misc.CustomerReminder.Models.CustomerReminderModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.CustomerReminder.Admin.Edit.Title").Text;
+}
+
+<h1>@ViewBag.PageTitle</h1>
+
+<form asp-action="Edit"
+      asp-controller="CustomerReminder"
+      asp-area="Admin"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <input asp-for="Id" type="hidden" />
+
+    <div class="content-header clearfix">
+        
+        <div class="float-right">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                @T("Plugins.Misc.CustomerReminder.Admin.Button.Update")
+            </button>
+            <a asp-action="List"
+               asp-controller="CustomerReminder"
+               asp-area="Admin"
+               class="btn btn-secondary">
+                Cancel
+            </a>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card card-default">
+                <div class="card-body">
+
+                    <!-- Customer Id -->
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <label asp-for="CustomerId"></label>
+                        </div>
+                        <div class="col-md-9">
+                            <input asp-for="CustomerId" class="form-control" />
+                            <span asp-validation-for="CustomerId"></span>
+                        </div>
+                    </div>
+
+                    <!-- Reminder Title -->
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <label asp-for="ReminderTitle"></label>
+                        </div>
+                        <div class="col-md-9">
+                            <input asp-for="ReminderTitle" class="form-control" />
+                            <span asp-validation-for="ReminderTitle"></span>
+                        </div>
+                    </div>
+
+                    <!-- Reminder Message -->
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <label asp-for="ReminderMessage"></label>
+                        </div>
+                        <div class="col-md-9">
+                            <textarea asp-for="ReminderMessage" class="form-control"></textarea>
+                            <span asp-validation-for="ReminderMessage"></span>
+                        </div>
+                    </div>
+
+                    <!-- Reminder Date -->
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <label asp-for="ReminderDate"></label>
+                        </div>
+                        <div class="col-md-9">
+                            <input asp-for="ReminderDate"
+                                   type="datetime-local"
+                                   class="form-control"
+                                   value="@(Model.ReminderDate.ToString("yyyy-MM-ddTHH:mm"))" />
+                            <span asp-validation-for="ReminderDate"></span>
+                        </div>
+                    </div>
+
+                    <!-- Is Sent -->
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <label asp-for="IsSent"></label>
+                        </div>
+                        <div class="col-md-9">
+                            <input asp-for="IsSent" type="checkbox" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
