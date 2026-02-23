@@ -52,19 +52,40 @@ public class CustomerReminderModelFactory : ICustomerReminderModelFactory
     {
         ArgumentNullException.ThrowIfNull(searchModel);
 
-        // get paged reminders
         var reminders = await _reminderService.GetAllPagedAsync(
-     pageIndex: searchModel.Page - 1,
-     pageSize: searchModel.PageSize,
-     customerId: searchModel.CustomerId,
-     isSent: searchModel.IsSent,
-     fromDate: searchModel.FromDate,
-     toDate: searchModel.ToDate);
+            pageIndex: searchModel.Page - 1,
+            pageSize: searchModel.PageSize,
+            customerId: searchModel.CustomerId,
+            isSent: searchModel.IsSent,
+            fromDate: searchModel.FromDate,
+            toDate: searchModel.ToDate);
 
+        // 🔥 Get all distinct customer IDs from this page
+        var customerIds = reminders
+            .Select(x => x.CustomerId)
+            .Distinct()
+            .ToList();
+
+        // 🔥 Load customers once (avoid duplicate calls)
+        var customerDictionary = new Dictionary<int, string>();
+
+        foreach (var id in customerIds)
+        {
+            var customer = await _customerService.GetCustomerByIdAsync(id);
+
+            if (customer != null)
+            {
+                customerDictionary[id] =
+                    $"{customer.FirstName} {customer.LastName} ({customer.Email})";
+            }
+            else
+            {
+                customerDictionary[id] = "Deleted Customer";
+            }
+        }
 
         var model = new CustomerReminderListModel();
 
-        // explicitly specify the generic types
         model.PrepareToGrid<CustomerReminderListModel, CustomerReminderModel, CustomerReminderRecord>(
             searchModel,
             reminders,
@@ -72,6 +93,9 @@ public class CustomerReminderModelFactory : ICustomerReminderModelFactory
             {
                 Id = reminder.Id,
                 CustomerId = reminder.CustomerId,
+                CustomerName = customerDictionary.ContainsKey(reminder.CustomerId)
+                    ? customerDictionary[reminder.CustomerId]
+                    : "Unknown",
                 ReminderTitle = reminder.ReminderTitle,
                 ReminderMessage = reminder.ReminderMessage,
                 ReminderDate = reminder.ReminderDate,

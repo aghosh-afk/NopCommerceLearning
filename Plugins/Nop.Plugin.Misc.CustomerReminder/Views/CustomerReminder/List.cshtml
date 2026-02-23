@@ -2,7 +2,7 @@
 
 @using Nop.Web.Framework.Models.DataTables
 @using Nop.Web.Framework
-@using Microsoft.AspNetCore.Routing
+
 @{
     Layout = "_AdminLayout";
 }
@@ -14,7 +14,8 @@
 <div class="content-header clearfix">
     <h1 class="float-left">Customer Reminders</h1>
     <div class="float-right">
-        <a href="@Url.Action("Create", "CustomerReminder", new { area = "Admin" })" class="btn btn-success">
+        <a href="@Url.Action("Create", "CustomerReminder", new { area = "Admin" })"
+           class="btn btn-success">
             <i class="fas fa-plus"></i> Create
         </a>
     </div>
@@ -23,16 +24,16 @@
 <section class="content">
     <div class="container-fluid">
 
-        <!-- Search Filters -->
+        <!-- SEARCH FILTERS -->
         <div class="card card-default card-search">
             <div class="card-body">
                 <div class="row">
 
-                    <!-- Customer Kendo DropDown -->
+                    <!-- Customer Dropdown -->
                     <div class="col-md-3">
                         <div class="form-group">
                             <label asp-for="CustomerId"></label>
-                            <input id="CustomerId" name="CustomerId" style="width:100%;" />
+                            <input id="CustomerId" style="width:100%;" />
                         </div>
                     </div>
 
@@ -40,7 +41,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label asp-for="IsSent"></label>
-                            <select asp-for="IsSent" class="form-control" name="IsSent">
+                            <select asp-for="IsSent" class="form-control">
                                 <option value="">All</option>
                                 <option value="true">Sent</option>
                                 <option value="false">Not Sent</option>
@@ -48,19 +49,19 @@
                         </div>
                     </div>
 
-                    <!-- FromDate -->
+                    <!-- From Date -->
                     <div class="col-md-3">
                         <div class="form-group">
                             <label asp-for="FromDate"></label>
-                            <input asp-for="FromDate" class="form-control" name="FromDate" />
+                            <input asp-for="FromDate" class="form-control" />
                         </div>
                     </div>
 
-                    <!-- ToDate -->
+                    <!-- To Date -->
                     <div class="col-md-3">
                         <div class="form-group">
                             <label asp-for="ToDate"></label>
-                            <input asp-for="ToDate" class="form-control" name="ToDate" />
+                            <input asp-for="ToDate" class="form-control" />
                         </div>
                     </div>
 
@@ -68,30 +69,36 @@
 
                 <div class="row mt-2">
                     <div class="col-md-12 text-center">
-                        <button type="button" id="search-reminders" class="btn btn-primary">
+                        <button type="button"
+                                id="search-reminders"
+                                class="btn btn-primary">
                             <i class="fas fa-search"></i> Search
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <!-- Grid Placeholder -->
+        <!-- GRID -->
         <div class="card card-default">
             <div class="card-body">
-                <div id="customerReminderGridContainer"></div>
+                <table id="customerReminderGrid"
+                       class="table table-bordered table-hover"></table>
             </div>
         </div>
 
     </div>
 </section>
 
-@section Scripts {
-<script type="text/javascript">
+@section Scripts{
+<script>
     $(document).ready(function () {
 
+        var dataTableName = "customerReminderGrid";
+
         // -----------------------------
-        // Kendo DropDownList for Customer
+        // KENDO CUSTOMER DROPDOWN
         // -----------------------------
         $("#CustomerId").kendoDropDownList({
             optionLabel: "Select Customer...",
@@ -99,13 +106,11 @@
             dataValueField: "Id",
             filter: "contains",
             minLength: 0,
-            autoBind: true, 
-
+            autoBind: true,
             dataSource: {
                 serverFiltering: true,
                 serverPaging: true,
                 pageSize: 10,
-
                 transport: {
                     read: {
                         url: '@Url.Action("CustomerList", "CustomerReminder", new { area = "Admin" })',
@@ -113,9 +118,10 @@
                         dataType: "json"
                     },
                     parameterMap: function (data) {
+
                         var searchValue = "";
 
-                        if (data.filter && data.filter.filters && data.filter.filters.length > 0) {
+                        if (data.filter && data.filter.filters.length > 0) {
                             searchValue = data.filter.filters[0].value;
                         }
 
@@ -128,94 +134,122 @@
                         };
                     }
                 },
-
                 schema: {
                     data: "Data",
                     total: "Total"
                 }
             }
-
         });
 
         // -----------------------------
-        // Initialize DataTable
+        // DATATABLE INIT
         // -----------------------------
-        var dataTableName = "customerReminderGrid";
+        $("#" + dataTableName).DataTable({
+            ajax: {
+                url: '@Url.Action("List", "CustomerReminder", new { area = "Admin" })',
+                type: "POST",
+                data: function (d) {
 
-        function initCustomerReminderGrid() {
-            $("#customerReminderGridContainer").html(""); // Clear placeholder
-            var tableHtml = '<table id="' + dataTableName + '" class="table table-bordered table-hover"></table>';
-            $("#customerReminderGridContainer").append(tableHtml);
+                    d.CustomerId = $("#CustomerId").val() || null;
+                    d.IsSent = $("#IsSent").val() || null;
+                    d.FromDate = $("#FromDate").val() || null;
+                    d.ToDate = $("#ToDate").val() || null;
 
-            $("#" + dataTableName).DataTable({
-                ajax: {
-                    url: '@Url.Action("List", "CustomerReminder", new { area = "Admin" })',
-                    type: "POST",
-                    data: function (d) {
+                    d.__RequestVerificationToken =
+                        $('input[name="__RequestVerificationToken"]').val();
 
-                        var customerId = $("#CustomerId").val();
-                        d.CustomerId = (customerId && customerId !== "0") ? customerId : null;
+                    return d;
+                }
+            },
+            serverSide: true,
+            processing: true,
+            pageLength: @Model.PageSize,
+            lengthMenu: @Html.Raw(Json.Serialize(Model.AvailablePageSizes)),
 
-                        var isSent = $("#IsSent").val();
-                        d.IsSent = (isSent !== "") ? isSent : null;
+            columns: [
+                { data: "Id", title: "Id", width: "60px" },
 
-                        var fromDate = $("#FromDate").val();
-                        d.FromDate = fromDate ? fromDate : null;
+                { data: "CustomerName", title: "Customer" },
 
-                        var toDate = $("#ToDate").val();
-                        d.ToDate = toDate ? toDate : null;
+                { data: "ReminderTitle", title: "Title" },
 
-                        d.__RequestVerificationToken =
-                            $('input[name="__RequestVerificationToken"]').val();
-
-                        return d;
+                {
+                    data: "ReminderDate",
+                    title: "Reminder Date",
+                    render: function (data) {
+                        if (!data) return "";
+                        return moment(data).format("DD-MM-YYYY HH:mm");
                     }
                 },
-                serverSide: true,
-                processing: true,
-                pageLength: @Model.PageSize,
-                lengthMenu: @Html.Raw(Json.Serialize(Model.AvailablePageSizes)),
-                columns: [
-                    { data: "Id", title: "Id", width: "50px" },
-                    { data: "CustomerId", title: "Customer Id" },
-                    { data: "ReminderTitle", title: "Title" },
-                    { data: "ReminderDate", title: "Reminder Date" },
-                    { 
-                        data: "IsSent", 
-                        title: "Sent", 
-                        width: "100px", 
-                        className: "text-center",
-                        render: function(data) { return data ? "Yes" : "No"; }
-                    },
-                    {
-                        data: "Id",
-                        title: "Actions",
-                        width: "150px",
-                        className: "text-center",
-                        orderable: false,
-                        render: function (data, type, row) {
-                            return `
-                                <a href='@Url.Action("Edit", "CustomerReminder", new { area = "Admin" })/${data}' class='btn btn-sm btn-primary'>
-                                    <i class='fas fa-edit'></i>
-                                </a>
-                                <a href='@Url.Action("Delete", "CustomerReminder", new { area = "Admin" })/${data}' class='btn btn-sm btn-danger'>
-                                    <i class='fas fa-trash'></i>
-                                </a>
-                            `;
-                        }
-                    }
-                ]
-            });
-        }
 
-        // Load grid by default
-        initCustomerReminderGrid();
+                {
+                    data: "IsSent",
+                    title: "Sent",
+                    width: "100px",
+                    className: "text-center",
+                    render: function (data) {
+                        return data
+                            ? '<span class="badge badge-success">Yes</span>'
+                            : '<span class="badge badge-danger">No</span>';
+                    }
+                },
+
+                {
+                    data: "Id",
+                    title: "Actions",
+                    width: "150px",
+                    orderable: false,
+                    className: "text-center",
+                    render: function (data) {
+
+                        var editUrl =
+                            '@Url.Action("Edit", "CustomerReminder", new { area = "Admin" })/' + data;
+
+                        return `
+                            <a href="${editUrl}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+
+                            <button class="btn btn-sm btn-danger delete-reminder"
+                                    data-id="${data}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+                    }
+                }
+            ]
+        });
 
         // -----------------------------
-        // Search Button
+        // SEARCH BUTTON
         // -----------------------------
         $("#search-reminders").click(function () {
             $("#" + dataTableName).DataTable().ajax.reload();
+        });
+
+        // -----------------------------
+        // DELETE HANDLER
+        // -----------------------------
+        $(document).on("click", ".delete-reminder", function () {
+
+            if (!confirm("Are you sure you want to delete this reminder?"))
+                return;
+
+            var id = $(this).data("id");
+
+            $.ajax({
+                url: '@Url.Action("Delete", "CustomerReminder", new { area = "Admin" })',
+                type: "POST",
+                data: {
+                    id: id,
+                    __RequestVerificationToken:
+                        $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function () {
+                    $("#" + dataTableName).DataTable().ajax.reload();
+                }
+            });
+
         });
 
     });

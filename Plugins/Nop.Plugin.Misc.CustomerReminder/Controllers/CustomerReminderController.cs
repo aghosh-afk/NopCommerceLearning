@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Nop.Core.Domain.Customers;
 using Nop.Plugin.Misc.CustomerReminder.Data;
 using Nop.Plugin.Misc.CustomerReminder.Factories;
 using Nop.Plugin.Misc.CustomerReminder.Models;
@@ -9,12 +7,7 @@ using Nop.Services.Customers;
 using Nop.Services.Helpers;
 using Nop.Services.Messages;
 using Nop.Web.Areas.Admin.Controllers;
-using Nop.Web.Framework.Mvc.Filters;
-using Nop.Web.Framework.UI;
 
-
-//[Area("Admin")]
-//[AuthorizeAdmin]Does not need because BaseAdminController is in already have this
 public class CustomerReminderController : BaseAdminController
 {
     private readonly ICustomerReminderService _service;
@@ -23,7 +16,12 @@ public class CustomerReminderController : BaseAdminController
     private readonly INotificationService _notificationService;
     private readonly IDateTimeHelper _dateTimeHelper;
 
-    public CustomerReminderController( ICustomerReminderService service, ICustomerService customerService, ICustomerReminderModelFactory modelFactory, INotificationService notificationService, IDateTimeHelper dateTimeHelper)
+    public CustomerReminderController(
+        ICustomerReminderService service,
+        ICustomerService customerService,
+        ICustomerReminderModelFactory modelFactory,
+        INotificationService notificationService,
+        IDateTimeHelper dateTimeHelper)
     {
         _service = service;
         _customerService = customerService;
@@ -32,9 +30,11 @@ public class CustomerReminderController : BaseAdminController
         _dateTimeHelper = dateTimeHelper;
     }
 
-    public async Task<IActionResult> List()
+    #region LIST
+
+    public IActionResult List()
     {
-        var model =new CustomerReminderSearchModel();
+        var model = new CustomerReminderSearchModel();
         model.SetGridPageSize();
         return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/List.cshtml", model);
     }
@@ -48,7 +48,7 @@ public class CustomerReminderController : BaseAdminController
 
         return Json(new
         {
-            draw = Convert.ToInt32(model.Draw),
+            draw = Convert.ToInt32(searchModel.Draw),   // must be number
             recordsTotal = model.RecordsTotal,
             recordsFiltered = model.RecordsFiltered,
             data = model.Data
@@ -56,33 +56,22 @@ public class CustomerReminderController : BaseAdminController
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CustomerList(int page, int pageSize, string search)
-    {
-        var (customers, total) =
-            await _service.SearchCustomersAsync(search, page, pageSize);
-
-        var data = customers.Select(c => new
-        {
-            Id = c.Id,
-            FullName = string.IsNullOrWhiteSpace(c.FirstName + c.LastName)
-                ? c.Email
-                : $"{c.FirstName} {c.LastName} ({c.Email})"
-        });
-
-        return Json(new
-        {
-            Data = data,
-            Total = total
-        });
+    [ValidateAntiForgeryToken] 
+    public async Task<IActionResult> CustomerList(int page, int pageSize, string search) 
+    { 
+        var (customers, total) = await _service.SearchCustomersAsync(search, page, pageSize);
+        var data = customers.Select(c => new { Id = c.Id, FullName = string.IsNullOrWhiteSpace(c.FirstName + c.LastName) ? c.Email : $"{c.FirstName} {c.LastName} ({c.Email})" }); 
+        return Json(new { Data = data, Total = total }); 
     }
 
-    public IActionResult Create()
+    #endregion
+
+    #region CREATE
+
+    public async Task<IActionResult> Create()
     {
-        var model = new CustomerReminderModel
-        {
-            ReminderDate = _dateTimeHelper.ConvertToUtcTime(DateTime.UtcNow)
-        };
+        var model = await _modelFactory
+            .PrepareCustomerReminderModelAsync(new CustomerReminderModel(), null);
 
         return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/Create.cshtml", model);
     }
@@ -115,38 +104,68 @@ public class CustomerReminderController : BaseAdminController
 
         _notificationService.SuccessNotification("Customer reminder created successfully.");
 
-        return RedirectToAction("List", "CustomerReminder", new { area = "Admin" });
+        return RedirectToAction("List");
     }
+
+    #endregion
+
+    #region EDIT
 
     public async Task<IActionResult> Edit(int id)
     {
-        var record = await _service.GetByIdAsync(id);
+        var entity = await _service.GetByIdAsync(id);
 
-        if (record == null)
+        if (entity == null)
             return RedirectToAction("List");
 
-        return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/Edit.cshtml", record);
+        var model = await _modelFactory
+            .PrepareCustomerReminderModelAsync(null, id);
+
+        return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/Edit.cshtml", model);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(CustomerReminderRecord model)
+    public async Task<IActionResult> Edit(CustomerReminderModel model)
     {
         if (!ModelState.IsValid)
             return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/Edit.cshtml", model);
 
-        await _service.UpdateAsync(model);
-        return RedirectToAction("List", "CustomerReminder", new { area = "Admin" });
+        var entity = await _service.GetByIdAsync(model.Id);
+
+        if (entity == null)
+            return RedirectToAction("List");
+
+        entity.CustomerId = model.CustomerId;
+        entity.ReminderTitle = model.ReminderTitle;
+        entity.ReminderMessage = model.ReminderMessage;
+        entity.ReminderDate = _dateTimeHelper.ConvertToUtcTime(model.ReminderDate);
+        entity.IsSent = model.IsSent;
+
+        await _service.UpdateAsync(entity);
+
+        _notificationService.SuccessNotification("Customer reminder updated successfully.");
+
+        return RedirectToAction("List");
     }
 
+    #endregion
+
+    #region DELETE
+
+    [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
-        var record = await _service.GetByIdAsync(id);
+        var entity = await _service.GetByIdAsync(id);
 
-        if (record != null)
-            await _service.DeleteAsync(record);
+        if (entity != null)
+        {
+            await _service.DeleteAsync(entity);
+            _notificationService.SuccessNotification("Customer reminder deleted successfully.");
+        }
 
-        return RedirectToAction("List", "CustomerReminder", new { area = "Admin" });
+        return RedirectToAction("List");
     }
 
+    #endregion
 }
