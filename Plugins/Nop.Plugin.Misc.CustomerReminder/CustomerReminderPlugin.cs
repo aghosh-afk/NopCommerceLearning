@@ -33,13 +33,20 @@ namespace Nop.Plugin.Misc.CustomerReminder
 
             var templates = await _messageTemplateService.GetAllMessageTemplatesAsync(0);
 
-            if (!templates.Any(t => t.Name == "Customer.Reminder"))
+            if (!templates.Any(t => t.Name == "Customer.Reminder.Notification"))//check the name in MessageTemplate table 
             {
                 var template = new MessageTemplate
                 {
-                    Name = "Customer.Reminder",
+                    Name = "Customer.Reminder.Notification",
                     Subject = "Reminder: %Reminder.Title%",
-                    Body = "Hello %Customer.Name%,<br/>%Reminder.Message%",
+                    Body = @"Hello %Customer.FullName%,<br/><br/>
+                            You have a reminder scheduled on:
+                            <b>%CustomerReminder.Date%</b> <br/><br/>
+                            Message:<br/>
+                            %CustomerReminder.Message%
+                            <br/><br/>
+                            Thank you,<br/>
+                            %Store.Name%",
                     IsActive = true,
                     EmailAccountId = 0
                 };
@@ -53,7 +60,7 @@ namespace Nop.Plugin.Misc.CustomerReminder
         public override async Task UninstallAsync()
         {
             var templates = await _messageTemplateService.GetAllMessageTemplatesAsync(0);
-            var template = templates.FirstOrDefault(t => t.Name == "Customer.Reminder");
+            var template = templates.FirstOrDefault(t => t.Name == "Customer.Reminder.Notification");
 
             if (template != null)
                 await _messageTemplateService.DeleteMessageTemplateAsync(template);

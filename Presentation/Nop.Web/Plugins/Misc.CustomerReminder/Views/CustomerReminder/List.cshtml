@@ -5,18 +5,21 @@
 
 @{
     Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.CustomerReminder.Admin.List.Title").Text;
 }
+
+<h1>@ViewBag.PageTitle</h1>
 
 <form id="antiForgeryForm">
     @Html.AntiForgeryToken()
 </form>
 
 <div class="content-header clearfix">
-    <h1 class="float-left">Customer Reminders</h1>
     <div class="float-right">
         <a href="@Url.Action("Create", "CustomerReminder", new { area = "Admin" })"
            class="btn btn-success">
-            <i class="fas fa-plus"></i> Create
+            <i class="fas fa-plus"></i>
+            @T("Plugins.Misc.CustomerReminder.Admin.Button.AddNew")
         </a>
     </div>
 </div>
@@ -72,11 +75,15 @@
                         <button type="button"
                                 id="search-reminders"
                                 class="btn btn-primary">
-                            <i class="fas fa-search"></i> Search
+                            <i class="fas fa-search"></i>
+                            @T("Plugins.Misc.CustomerReminder.Admin.Button.Search")
+                        </button>
+                        <button id="resetBtn" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> @T("Plugins.Misc.CustomerReminder.Admin.Button.ResetFilter")
                         </button>
                     </div>
                 </div>
-
+                
             </div>
         </div>
 
@@ -101,7 +108,7 @@
         // KENDO CUSTOMER DROPDOWN
         // -----------------------------
         $("#CustomerId").kendoDropDownList({
-            optionLabel: "Select Customer...",
+            optionLabel: '@T("Plugins.Misc.CustomerReminder.Admin.SelectCustomer")',
             dataTextField: "FullName",
             dataValueField: "Id",
             filter: "contains",
@@ -225,6 +232,15 @@
         // -----------------------------
         $("#search-reminders").click(function () {
             $("#" + dataTableName).DataTable().ajax.reload();
+        });
+
+        //Filter Clear button
+        $("#resetBtn").click(function () {
+            // Clear all filters
+            $("#CustomerFilter").val('');
+            grid.dataSource.filter([]); // remove filters
+            grid.dataSource.page(1); // reset to first page
+            grid.dataSource.read(); // reload data
         });
 
         // -----------------------------

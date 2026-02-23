@@ -1,9 +1,10 @@
 ﻿@model Nop.Plugin.Misc.CustomerReminder.Models.CustomerReminderModel
 
 @{
-        Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-    ViewBag.PageTitle = "Create Customer Reminder";
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.CustomerReminder.Admin.Create.Title").Text;
 }
+<h1>@ViewBag.PageTitle</h1>
 
 <form asp-action="Create"
       asp-controller="CustomerReminder"
@@ -14,18 +15,16 @@
     @Html.AntiForgeryToken()
 
     <div class="content-header clearfix">
-        <h1 class="float-left">
-            Create Customer Reminder
-        </h1>
         <div class="float-right">
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Save
+                <i class="fas fa-save"></i>
+                @T("Plugins.Misc.CustomerReminder.Admin.Button.Save")
             </button>
             <a asp-action="List"
                asp-controller="CustomerReminder"
                asp-area="Admin"
                class="btn btn-secondary">
-                Cancel
+                @T("Plugins.Misc.CustomerReminder.Admin.Button.Cancel")
             </a>
         </div>
     </div>
@@ -41,9 +40,10 @@
                             <nop-label asp-for="CustomerId" />
                         </div>
                         <div class="col-md-9">
-                            <input asp-for="CustomerId"
-                                   id="CustomerId"
-                                   style="width:100%;" />
+
+                            <input asp-for="CustomerId" type="hidden" />
+                            <input id="CustomerIdDropdown" style="width:100%;" />
+
                             <span asp-validation-for="CustomerId"></span>
                         </div>
                     </div>
@@ -65,7 +65,7 @@
                             <nop-label asp-for="ReminderMessage" />
                         </div>
                         <div class="col-md-9">
-                            <nop-editor asp-for="ReminderMessage" />
+                            <nop-textarea asp-for="ReminderMessage" />
                             <span asp-validation-for="ReminderMessage"></span>
                         </div>
                     </div>
@@ -88,51 +88,55 @@
 </form>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
+<script>
+    $(document).ready(function () {
 
-            // Customer dropdown
-            $("#CustomerId").kendoDropDownList({
-                optionLabel: "Select Customer...",
-                dataTextField: "FullName",
-                dataValueField: "Id",
-                filter: "contains",
-                autoBind: true,
-                minLength: 2,
+    var hiddenField = $("#CustomerId");
 
-                dataSource: {
-                    serverFiltering: true,
-                    serverPaging: true,
-                    pageSize: 10,
-                    transport: {
-                        read: {
-                            url: '@Url.Action("CustomerList", "CustomerReminder", new { area = "Admin" })',
-                            type: "POST",
-                            dataType: "json"
-                        },
-                        parameterMap: function (data) {
+    $("#CustomerIdDropdown").kendoDropDownList({
+        optionLabel: '@T("Plugins.Misc.CustomerReminder.Admin.SelectCustomer")',
+        dataTextField: "FullName",
+        dataValueField: "Id",
+        filter: "contains",
+        autoBind: true,
+        minLength: 2,
+        value: hiddenField.val(),   // 🔥 IMPORTANT
+        change: function () {
+            hiddenField.val(this.value());
+        },
+        dataSource: {
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 10,
+            transport: {
+                read: {
+                    url: '@Url.Action("CustomerList", "CustomerReminder", new { area = "Admin" })',
+                    type: "POST",
+                    dataType: "json"
+                },
+                parameterMap: function (data) {
 
-                            var searchValue = "";
-                            if (data.filter && data.filter.filters.length > 0) {
-                                searchValue = data.filter.filters[0].value;
-                            }
-
-                            return {
-                                page: data.page || 1,
-                                pageSize: data.pageSize || 10,
-                                search: searchValue,
-                                __RequestVerificationToken:
-                                    $('input[name="__RequestVerificationToken"]').val()
-                            };
-                        }
-                    },
-                    schema: {
-                        data: "Data",
-                        total: "Total"
+                    var searchValue = "";
+                    if (data.filter && data.filter.filters.length > 0) {
+                        searchValue = data.filter.filters[0].value;
                     }
-                }
-            });
 
-        });
-    </script>
+                    return {
+                        page: data.page || 1,
+                        pageSize: data.pageSize || 10,
+                        search: searchValue,
+                        __RequestVerificationToken:
+                            $('input[name="__RequestVerificationToken"]').val()
+                    };
+                }
+            },
+            schema: {
+                data: "Data",
+                total: "Total"
+            }
+        }
+    });
+
+});
+</script>
 }

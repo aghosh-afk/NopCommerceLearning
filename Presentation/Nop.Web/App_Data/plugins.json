@@ -4,16 +4,16 @@
   ],
   "InstalledPlugins": [
     {
-      "SystemName": "Misc.CustomerReminder",
-      "Version": "4.90.1"
-    },
-    {
       "SystemName": "Misc.Brevo",
       "Version": "4.90.8"
     },
     {
       "SystemName": "Widgets.Swiper",
       "Version": "4.90.4"
+    },
+    {
+      "SystemName": "Misc.CustomerReminder",
+      "Version": "4.90.1"
     }
   ],
   "PluginNamesToUninstall": [],

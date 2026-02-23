@@ -44,6 +44,11 @@ public class CustomerReminderModelFactory : ICustomerReminderModelFactory
                 model.IsSent = entity.IsSent;
             }
         }
+        else
+        {
+            // 🔥 IMPORTANT FOR CREATE
+            model.ReminderDate = DateTime.Now;
+        }
 
         return model;
     }

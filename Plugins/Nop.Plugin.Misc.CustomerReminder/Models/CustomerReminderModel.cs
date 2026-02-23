@@ -1,15 +1,18 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using FluentMigrator.Infrastructure;
 using Nop.Web.Framework.Models;
 using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Plugin.Misc.CustomerReminder.Models;
 public record CustomerReminderModel : BaseNopEntityModel
 {
-    [NopResourceDisplayName("Plugins.Misc.CustomerReminder.Fields.CustomerId")]
+    [Range(1, int.MaxValue, ErrorMessage = "Customer is required")]
+    [NopResourceDisplayName("Plugins.Misc.CustomerReminder.Fields.Customer")]
     public int CustomerId { get; set; }
 
-    [NopResourceDisplayName("Plugins.Misc.CustomerReminder.Fields.Customer")]
-    public string CustomerName { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.CustomerReminder.Fields.CustomerName")]
+    public string? CustomerName { get; set; }
 
     [NopResourceDisplayName("Plugins.Misc.CustomerReminder.Fields.ReminderTitle")]
     public string ReminderTitle { get; set; } = string.Empty;

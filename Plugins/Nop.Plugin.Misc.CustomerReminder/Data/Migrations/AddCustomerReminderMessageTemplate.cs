@@ -17,14 +17,14 @@ namespace Nop.Plugin.Misc.CustomerReminder.Data.Migrations
                     Name = "Customer.Reminder.Notification",
                     Subject = "Reminder: %CustomerReminder.Title%",
                     Body = @"
-Hello %Customer.FullName%,<br/><br/>
-You have a reminder scheduled on:
-<b>%CustomerReminder.Date%</b> <br/><br/>
-Message:<br/>
-%CustomerReminder.Message%
-<br/><br/>
-Thank you,<br/>
-%Store.Name%",
+                            Hello %Customer.FullName%,<br/><br/>
+                            You have a reminder scheduled on:
+                            <b>%CustomerReminder.Date%</b> <br/><br/>
+                            Message:<br/>
+                            %CustomerReminder.Message%
+                            <br/><br/>
+                            Thank you,<br/>
+                            %Store.Name%",
                     IsActive = true,
                     LimitedToStores = false,
                     EmailAccountId = 1,
