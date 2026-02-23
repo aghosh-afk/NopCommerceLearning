@@ -32,19 +32,17 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
         {
             var template = _messageTemplateRepository.Table
                 .FirstOrDefault(t => t.Name == "Customer.Reminder.Notification" && t.IsActive);
+
             if (template == null)
                 return;
 
             // Store name
             var store = _storeService.GetAllStores().FirstOrDefault();
-            var storeName = store != null ? store.Name : "Store";
+            var storeName = store?.Name ?? "Store";
 
-            // Determine email account
-            EmailAccount emailAccount = null;
-            if (template.EmailAccountId > 0)
-                emailAccount = _emailAccountRepository.Table.FirstOrDefault(e => e.Id == template.EmailAccountId);
-            if (emailAccount == null)
-                emailAccount = _emailAccountRepository.Table.FirstOrDefault();
+            var emailAccount = _emailAccountRepository.Table
+                .FirstOrDefault(e => e.Id == template.EmailAccountId)
+                ?? _emailAccountRepository.Table.FirstOrDefault();
 
             var fromEmail = emailAccount?.Email ?? "admin@store.com";
             var fromName = emailAccount?.DisplayName ?? storeName;
@@ -74,8 +72,10 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
                 Subject = subject,
                 Body = body,
                 CreatedOnUtc = DateTime.UtcNow,
-                EmailAccountId = emailAccountId,
-                Priority = QueuedEmailPriority.High
+                DontSendBeforeDateUtc = null,   // <-- allow immediate sending
+                SentOnUtc = null,               // <-- must be null so task can send it
+                EmailAccountId = emailAccount?.Id ?? 0,
+                Priority = QueuedEmailPriority.High,
             };
 
             _queuedEmailRepository.Insert(queuedEmail);

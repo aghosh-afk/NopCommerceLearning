@@ -1,0 +1,12 @@
+﻿{
+  "Group": "Misc",
+  "FriendlyName": "Customer Reminder",
+  "SystemName": "Misc.CustomerReminder",
+  "Version": "4.90.1",
+  "SupportedVersions": [ "4.90" ],
+  "Author": "Abhijit",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Misc.CustomerReminder.dll",
+  "Description": "nopCommerce mobile application helper"
+}
+

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Nop.Core;
+using Nop.Core.Domain.Customers;
 using Nop.Data;
 using Nop.Plugin.Misc.CustomerReminder.Data;
 using Nop.Services.Customers;
@@ -10,23 +12,47 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
     public class CustomerReminderService : ICustomerReminderService
     {
         private readonly IRepository<CustomerReminderRecord> _repository;
+        private readonly IRepository<Customer> _customerRepository;
         private readonly ICustomerService _customerService;
         private readonly CustomerReminderEmailService _emailService;
 
         public CustomerReminderService(
             IRepository<CustomerReminderRecord> repository,
             ICustomerService customerService,
-            CustomerReminderEmailService emailService)
+            CustomerReminderEmailService emailService,
+            IRepository<Customer> customerRepository)
         {
             _repository = repository;
             _customerService = customerService;
             _emailService = emailService;
+            _customerRepository = customerRepository;
         }
 
-        public async Task<IList<CustomerReminderRecord>> GetAllAsync()
+        public async Task<IPagedList<CustomerReminderRecord>> GetAllPagedAsync(
+    int pageIndex,
+    int pageSize,
+    int? customerId = null,
+    bool? isSent = null,
+    DateTime? fromDate = null,
+    DateTime? toDate = null)
         {
-            return await _repository.Table.OrderByDescending(x => x.CreatedOnUtc).ToListAsync();
+            var query = _repository.Table;
+
+            if (customerId.HasValue)
+                query = query.Where(x => x.CustomerId == customerId.Value);
+
+            if (isSent.HasValue)
+                query = query.Where(x => x.IsSent == isSent.Value);
+
+            if (fromDate.HasValue)
+                query = query.Where(x => x.ReminderDate >= fromDate.Value);
+
+            if (toDate.HasValue)
+                query = query.Where(x => x.ReminderDate <= toDate.Value);
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
         }
+
 
         public async Task<CustomerReminderRecord?> GetByIdAsync(int id)
         {
@@ -54,6 +80,29 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
         public async Task DeleteAsync(CustomerReminderRecord record)
         {
             await _repository.DeleteAsync(record);
+        }
+        public async Task<(IList<Customer> Customers, int TotalCount)> SearchCustomersAsync(string search, int page, int pageSize)
+        {
+            var query = _customerRepository.Table;
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+
+                query = query.Where(c =>
+                    c.FirstName.Contains(search) ||
+                    c.LastName.Contains(search));
+            }
+
+            var total = await query.CountAsync();
+
+            var customers = await query
+                .OrderBy(c => c.FirstName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (customers, total);
         }
     }
 }
