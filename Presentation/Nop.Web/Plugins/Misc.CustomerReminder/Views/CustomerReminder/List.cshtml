@@ -235,12 +235,17 @@
         });
 
         //Filter Clear button
-        $("#resetBtn").click(function () {
-            // Clear all filters
-            $("#CustomerFilter").val('');
-            grid.dataSource.filter([]); // remove filters
-            grid.dataSource.page(1); // reset to first page
-            grid.dataSource.read(); // reload data
+        $("#resetBtn").click(function (e) {
+            e.preventDefault(); // prevent default form submit if inside a form
+
+            // Reset filters
+            $("#CustomerId").data("kendoDropDownList").value(""); // reset Kendo dropdown
+            $("#IsSent").val(""); // reset select
+            $("#FromDate").val(""); // reset input
+            $("#ToDate").val(""); // reset input
+
+            // Reload DataTable
+            $("#" + dataTableName).DataTable().ajax.reload();
         });
 
         // -----------------------------
