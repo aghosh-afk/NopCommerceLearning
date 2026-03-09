@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Plugin.Misc.CustomerReminder.Domain;
 using Nop.Plugin.Misc.CustomerReminder.Factories;
 using Nop.Plugin.Misc.CustomerReminder.Models;
@@ -6,6 +7,7 @@ using Nop.Plugin.Misc.CustomerReminder.Services;
 using Nop.Services.Customers;
 using Nop.Services.Helpers;
 using Nop.Services.Messages;
+using Nop.Services.Security;
 using Nop.Web.Areas.Admin.Controllers;
 
 public class CustomerReminderController : BaseAdminController
@@ -18,6 +20,7 @@ public class CustomerReminderController : BaseAdminController
     private readonly ICustomerReminderModelFactory _modelFactory;
     private readonly INotificationService _notificationService;
     private readonly IDateTimeHelper _dateTimeHelper;
+    private readonly IPermissionService _permissionService;
 
     #endregion
 
@@ -28,13 +31,15 @@ public class CustomerReminderController : BaseAdminController
         ICustomerService customerService,
         ICustomerReminderModelFactory modelFactory,
         INotificationService notificationService,
-        IDateTimeHelper dateTimeHelper)
+        IDateTimeHelper dateTimeHelper,
+        IPermissionService permissionService)
     {
         _service = service;
         _customerService = customerService;
         _modelFactory = modelFactory;
         _notificationService = notificationService;
         _dateTimeHelper = dateTimeHelper;
+        _permissionService = permissionService;
     }
 
     #endregion
@@ -43,8 +48,12 @@ public class CustomerReminderController : BaseAdminController
 
     #region LIST
 
-    public IActionResult List()
+    public async Task<IActionResult> List()
     {
+        //if(await _permissionService.AuthorizeAsync())
+        //{
+        //    return AccessDeniedView();
+        //}
         var model = new CustomerReminderSearchModel();
         model.SetGridPageSize();
         return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/List.cshtml", model);
