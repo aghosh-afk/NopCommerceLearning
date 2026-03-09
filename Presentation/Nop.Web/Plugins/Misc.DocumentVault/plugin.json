@@ -1,0 +1,12 @@
+﻿{
+  "Group": "Misc",
+  "FriendlyName": "Document Vault",
+  "SystemName": "Misc.DocumentVault",
+  "Version": "4.90.0",
+  "SupportedVersions": [ "4.90" ],
+  "Author": "Abhijit",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Misc.DocumentVault.dll",
+  "Description": "Document Vault"
+}
+

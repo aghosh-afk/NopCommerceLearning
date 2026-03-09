@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Data;
-using Nop.Plugin.Misc.CustomerReminder.Data;
+using Nop.Plugin.Misc.CustomerReminder.Domain;
 using Nop.Services.Customers;
 
 namespace Nop.Plugin.Misc.CustomerReminder.Services

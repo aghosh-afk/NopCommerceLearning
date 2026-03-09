@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11505.172 d18.3
+VisualStudioVersion = 18.3.11505.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{E4ACA93B-D3DE-4557-B069-F1DB42925A4B}"
 EndProject
@@ -79,7 +79,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Misc.CloudflareI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Misc.RFQ", "Plugins\Nop.Plugin.Misc.RFQ\Nop.Plugin.Misc.RFQ.csproj", "{7CFA7C2C-54B6-4EB9-9F98-32437281FAE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Misc.CustomerReminder", "..\..\nopCommerce_4.90.3_Source2\src\Plugins\Nop.Plugin.Misc.CustomerReminder\Nop.Plugin.Misc.CustomerReminder.csproj", "{318B05D3-6605-AED2-84DB-A1D7DF79A18A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Misc.CustomerReminder", "Plugins\Nop.Plugin.Misc.CustomerReminder\Nop.Plugin.Misc.CustomerReminder.csproj", "{318B05D3-6605-AED2-84DB-A1D7DF79A18A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Misc.DocumentVault", "Plugins\Nop.Plugin.Misc.DocumentVault\Nop.Plugin.Misc.DocumentVault.csproj", "{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -489,6 +491,18 @@ Global
 		{318B05D3-6605-AED2-84DB-A1D7DF79A18A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{318B05D3-6605-AED2-84DB-A1D7DF79A18A}.Release|x86.ActiveCfg = Release|Any CPU
 		{318B05D3-6605-AED2-84DB-A1D7DF79A18A}.Release|x86.Build.0 = Release|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Debug|x86.Build.0 = Debug|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Release|x86.ActiveCfg = Release|Any CPU
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -529,6 +543,7 @@ Global
 		{877B52F9-B072-4138-8022-293101A080B1} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{7CFA7C2C-54B6-4EB9-9F98-32437281FAE5} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{318B05D3-6605-AED2-84DB-A1D7DF79A18A} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
+		{755060EE-AA02-42CA-8199-C9C6B8ABF1CB} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EE72A8B2-332A-4175-9319-6726D36E9D25}

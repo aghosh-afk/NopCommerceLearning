@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Nop.Plugin.Misc.CustomerReminder.Data;
+using Nop.Plugin.Misc.CustomerReminder.Domain;
 using Nop.Plugin.Misc.CustomerReminder.Models;
 using Nop.Plugin.Misc.CustomerReminder.Services;
 using Nop.Services.Customers;

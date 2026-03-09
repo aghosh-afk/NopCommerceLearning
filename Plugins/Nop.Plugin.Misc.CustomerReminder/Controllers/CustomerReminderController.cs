@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Nop.Plugin.Misc.CustomerReminder.Data;
+using Nop.Plugin.Misc.CustomerReminder.Domain;
 using Nop.Plugin.Misc.CustomerReminder.Factories;
 using Nop.Plugin.Misc.CustomerReminder.Models;
 using Nop.Plugin.Misc.CustomerReminder.Services;
@@ -10,11 +10,18 @@ using Nop.Web.Areas.Admin.Controllers;
 
 public class CustomerReminderController : BaseAdminController
 {
+
+    #region Fields
+
     private readonly ICustomerReminderService _service;
     private readonly ICustomerService _customerService;
     private readonly ICustomerReminderModelFactory _modelFactory;
     private readonly INotificationService _notificationService;
     private readonly IDateTimeHelper _dateTimeHelper;
+
+    #endregion
+
+    #region Ctor
 
     public CustomerReminderController(
         ICustomerReminderService service,
@@ -29,6 +36,10 @@ public class CustomerReminderController : BaseAdminController
         _notificationService = notificationService;
         _dateTimeHelper = dateTimeHelper;
     }
+
+    #endregion
+
+    #region Methods
 
     #region LIST
 
@@ -166,6 +177,8 @@ public class CustomerReminderController : BaseAdminController
 
         return RedirectToAction("List");
     }
+
+    #endregion
 
     #endregion
 }

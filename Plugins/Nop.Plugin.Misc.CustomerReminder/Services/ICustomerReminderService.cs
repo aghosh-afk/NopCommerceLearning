@@ -1,6 +1,6 @@
 ﻿using Nop.Core;
 using Nop.Core.Domain.Customers;
-using Nop.Plugin.Misc.CustomerReminder.Data;
+using Nop.Plugin.Misc.CustomerReminder.Domain;
 
 namespace Nop.Plugin.Misc.CustomerReminder.Services
 {

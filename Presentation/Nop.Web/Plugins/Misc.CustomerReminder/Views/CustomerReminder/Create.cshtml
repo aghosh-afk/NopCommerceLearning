@@ -13,7 +13,7 @@
       id="customerReminderForm">
 
     @Html.AntiForgeryToken()
-
+    <div asp-validation-summary="All" class="text-danger"></div>
     <div class="content-header clearfix">
         <div class="float-right">
             <button type="submit" class="btn btn-primary">
@@ -62,7 +62,7 @@
                     <!-- Reminder Message -->
                     <div class="form-group row">
                         <div class="col-md-3">
-                            <nop-label asp-for="ReminderMessage" />
+                            <nop-label asp-for="ReminderMessage" asp-required="true"/>
                         </div>
                         <div class="col-md-9">
                             <nop-textarea asp-for="ReminderMessage" />
@@ -73,11 +73,11 @@
                     <!-- Reminder Date -->
                     <div class="form-group row">
                         <div class="col-md-3">
-                            <nop-label asp-for="ReminderDate" />
+                            <nop-label asp-for="ReminderDate" asp-required="true"/>
                         </div>
                         <div class="col-md-9">
                             <nop-editor asp-for="ReminderDate" />
-                            <span asp-validation-for="ReminderDate"></span>
+                            <span asp-validation-for="ReminderDate"></span> 
                         </div>
                     </div>
 

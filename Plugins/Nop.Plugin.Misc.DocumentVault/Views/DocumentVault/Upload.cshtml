@@ -1,0 +1,113 @@
+﻿@model Nop.Plugin.Misc.DocumentVault.Models.DocumentModel
+
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="content-header clearfix">
+    <h1 class="float-left">Upload Document</h1>
+
+    <div class="float-right">
+        <a asp-controller="DocumentVaultAdmin"
+           asp-action="List"
+           class="btn btn-secondary">
+            Back to List
+        </a>
+    </div>
+</div>
+
+<section class="content">
+
+<form asp-controller="DocumentVaultAdmin"
+      asp-action="Upload"
+      method="post"
+      enctype="multipart/form-data">
+
+    <div class="card">
+        <div class="card-body">
+
+            <!-- TITLE -->
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <label asp-for="Title">Title</label>
+                </div>
+                <div class="col-md-9">
+                    <input asp-for="Title" class="form-control"/>
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- ENTITY TYPE -->
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <label asp-for="EntityType">Entity Type</label>
+                </div>
+                <div class="col-md-9">
+                    <select id="EntityType" asp-for="EntityType" asp-items="Model.AvailableEntityTypes" class="form-control">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="EntityType" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- ENTITY -->
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <label asp-for="EntityId">Entity</label>
+                </div>
+                <div class="col-md-9">
+                    <select asp-for="EntityId" class="form-control" id="EntityId">
+                        <option value="">Select</option>
+                    </select>
+                    <span asp-validation-for="EntityId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- FILE -->
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <label asp-for="File">File</label>
+                </div>
+                <div class="col-md-9">
+                    <input type="file" asp-for="File" class="form-control"/>
+                    <span asp-validation-for="File" class="text-danger"></span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </div>
+    </div>
+
+</form>
+
+</section>
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+
+            $("#EntityType").change(function () {
+
+                var entityType = $(this).val();
+                $("#EntityId").empty();
+
+                if (!entityType)
+                    return;
+
+                $.get('@Url.Action("GetEntities","DocumentVaultAdmin")',
+                    { entityType: entityType },
+                    function (data) {
+                        $("#EntityId").append('<option value="">Select</option>');
+                        $.each(data, function (i, item) {
+                            $("#EntityId").append('<option value="' + item.id + '">' + item.name + '</option>');
+                        });
+                    });
+            });
+
+        });
+    </script>
+}

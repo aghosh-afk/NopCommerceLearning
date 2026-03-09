@@ -1,0 +1,65 @@
+﻿@model Nop.Plugin.Misc.DocumentVault.Models.DocumentListModel
+
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Plugins.Misc.DocumentVault.List.Title")
+    </h1>
+</div>
+
+<section class="content">
+    <div class="card">
+        <div class="card-body">
+
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>@T("Plugins.Misc.DocumentVault.Fields.Title")</th>
+                        <th>@T("Plugins.Misc.DocumentVault.Fields.Entity")</th>
+                        <th>@T("Plugins.Misc.DocumentVault.Fields.FileName")</th>
+                        <th>@T("Plugins.Misc.DocumentVault.Fields.Uploaded")</th>
+                        <th>@T("Plugins.Misc.DocumentVault.Fields.Download")</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                @if (Model.Documents != null && Model.Documents.Count > 0)
+                {
+                    foreach (var doc in Model.Documents)
+                    {
+                        <tr>
+                            <td>@doc.Title</td>
+                            <td>@doc.EntityType (@doc.EntityId)</td>
+                            <td>@doc.FileName</td>
+                            <td>@doc.UploadedOnUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>
+                                <a asp-controller="DocumentVaultAdmin"
+                                   asp-action="Download"
+                                   asp-route-id="@doc.Id"
+                                   class="btn btn-success btn-sm">
+                                   @T("Plugins.Misc.DocumentVault.Download")
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" style="text-align:center;">
+                            @T("Plugins.Misc.DocumentVault.NoDocuments")
+                        </td>
+                    </tr>
+                }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+</section>
