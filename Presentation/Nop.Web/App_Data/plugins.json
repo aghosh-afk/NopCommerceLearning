@@ -12,8 +12,16 @@
       "Version": "4.90.4"
     },
     {
+      "SystemName": "Tax.Avalara",
+      "Version": "4.90.7"
+    },
+    {
       "SystemName": "Misc.CustomerReminder",
       "Version": "4.90.1"
+    },
+    {
+      "SystemName": "Misc.DocumentVault",
+      "Version": "4.90.0"
     }
   ],
   "PluginNamesToUninstall": [],

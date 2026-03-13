@@ -17,7 +17,7 @@ namespace Nop.Plugin.Misc.CustomerReminder.Infrastructure
             {
                 SystemName = "CustomerReminder",
                 Title = "Customer Reminder",
-                Url= "/Admin/CustomerReminder/List",
+                //Url= "#",//null or if their is address then it would redirect to the page
                 IconClass = "far fa-bell",
                 Visible = true,
                 
@@ -27,18 +27,18 @@ namespace Nop.Plugin.Misc.CustomerReminder.Infrastructure
             {
                 SystemName = "CustomerReminder.List",
                 Title = "All Reminder",
-                Url = "/Admin/CustomerReminder/List",
-                IconClass = "far fa-bell",
-                Visible = true,
+                Url = eventMessage.GetMenuItemUrl("CustomerReminder", "List"),
+                IconClass = "far fa-list",
+                Visible = true
             });
 
             menuItem.ChildNodes.Add(new AdminMenuItem
             {
                 SystemName = "CustomerReminder.Create",
                 Title = "Create Reminder",
-                Url = "/Admin/CustomerReminder/Create",
-                IconClass = "far fa-bell",
-                Visible = true,
+                Url = eventMessage.GetMenuItemUrl("CustomerReminder", "Create"),
+                IconClass = "far fa-plus-square",
+                Visible = true
             });
 
             //// ✅ Option 1: Add to root

@@ -10,5 +10,7 @@ public interface ICustomerReminderModelFactory
         int? reminderId);
 
     Task<CustomerReminderListModel> PrepareCustomerReminderListModelAsync(
-        CustomerReminderSearchModel searchModel);
+    CustomerReminderSearchModel searchModel,
+    int sortColumn,
+    string sortDirection);
 }

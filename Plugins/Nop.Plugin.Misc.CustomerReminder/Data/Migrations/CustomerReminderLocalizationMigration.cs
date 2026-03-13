@@ -1,10 +1,11 @@
 ﻿using FluentMigrator;
 using Nop.Data.Migrations;
 using Nop.Services.Localization;
+using Nop.Services.Plugins;
 
 namespace Nop.Plugin.Misc.CustomerReminder.Data.Migrations;
 
-[NopMigration("2026/02/23 12:00:00:0000000", "CustomerReminder localization", MigrationProcessType.Installation)]
+[NopMigration("2026/03/05 12:00:00:0000000", "CustomerReminder localization", MigrationProcessType.Installation)]
 public class CustomerReminderLocalizationMigration : Migration
 {
     private readonly ILocalizationService _localizationService;
@@ -48,6 +49,10 @@ public class CustomerReminderLocalizationMigration : Migration
 
             // Search / Filter
             ["Plugins.Misc.CustomerReminder.Admin.Search.Placeholder"] = "Search...",
+            ["Plugins.Misc.CustomerReminder.Fields.Customer.Required"] = "Customer is required",
+            ["Plugins.Misc.CustomerReminder.Fields.Title.Required"] = "Reminder title is required",
+            ["Plugins.Misc.CustomerReminder.Fields.Message.Required"] = "Reminder message is required",
+            ["Plugins.Misc.CustomerReminder.Fields.Date.Required"] = "Reminder date is required",
         });
     }
 
