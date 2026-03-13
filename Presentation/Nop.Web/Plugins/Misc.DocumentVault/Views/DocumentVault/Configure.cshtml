@@ -1,0 +1,114 @@
+﻿@model Nop.Plugin.Misc.DocumentVault.Models.ConfigurationModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.DocumentVault.Configure").Text;
+}
+
+<form asp-controller="DocumentVaultSettings"
+      asp-action="Configure"
+      method="post">
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Plugins.Misc.DocumentVault.Configure")
+    </h1>
+
+    <div class="float-right">
+        <button type="submit" class="btn btn-primary">
+            <i class="far fa-save"></i>
+            @T("Admin.Common.Save")
+        </button>
+    </div>
+</div>
+
+<section class="content">
+<div class="container-fluid">
+<div class="card card-default">
+
+<div class="card-body">
+
+<div class="form-group row">
+
+<div class="col-md-3">
+<nop-label asp-for="IsEnable"/>
+</div>
+
+<div class="col-md-9">
+<nop-editor asp-for="IsEnable"/>
+</div>
+
+</div>
+
+
+<div class="form-group row">
+
+<div class="col-md-3">
+<nop-label asp-for="Endpoint"/>
+</div>
+
+<div class="col-md-9">
+<nop-editor asp-for="Endpoint"/>
+</div>
+
+</div>
+
+
+<div class="form-group row">
+
+<div class="col-md-3">
+<nop-label asp-for="AccessKey"/>
+</div>
+
+<div class="col-md-9">
+<nop-editor asp-for="AccessKey"/>
+</div>
+
+</div>
+
+
+<div class="form-group row">
+
+<div class="col-md-3">
+<nop-label asp-for="SecretKey"/>
+</div>
+
+<div class="col-md-9">
+<nop-editor asp-for="SecretKey"/>
+</div>
+
+</div>
+
+
+<div class="form-group row">
+
+<div class="col-md-3">
+<nop-label asp-for="BucketName"/>
+</div>
+
+<div class="col-md-9">
+<nop-editor asp-for="BucketName"/>
+</div>
+
+</div>
+
+
+<div class="form-group row">
+
+<div class="col-md-3">
+<nop-label asp-for="UseSSL"/>
+</div>
+
+<div class="col-md-9">
+<nop-editor asp-for="UseSSL"/>
+</div>
+
+</div>
+
+
+</div>
+</div>
+</div>
+</section>
+
+</form>

@@ -7,7 +7,6 @@ using Nop.Web.Framework.Mvc.ModelBinding;
 namespace Nop.Plugin.Misc.CustomerReminder.Models;
 public record CustomerReminderModel : BaseNopEntityModel
 {
-    [Range(1, int.MaxValue, ErrorMessage = "Customer is required")]
     [NopResourceDisplayName("Plugins.Misc.CustomerReminder.Fields.Customer")]
     public int CustomerId { get; set; }
 

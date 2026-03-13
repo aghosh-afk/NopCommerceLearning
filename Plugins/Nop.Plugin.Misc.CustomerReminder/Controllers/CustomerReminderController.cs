@@ -1,39 +1,59 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Nop.Plugin.Misc.CustomerReminder.Data;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Nop.Plugin.Misc.CustomerReminder.Domain;
 using Nop.Plugin.Misc.CustomerReminder.Factories;
 using Nop.Plugin.Misc.CustomerReminder.Models;
 using Nop.Plugin.Misc.CustomerReminder.Services;
 using Nop.Services.Customers;
 using Nop.Services.Helpers;
 using Nop.Services.Messages;
+using Nop.Services.Security;
 using Nop.Web.Areas.Admin.Controllers;
 
 public class CustomerReminderController : BaseAdminController
 {
+
+    #region Fields
+
     private readonly ICustomerReminderService _service;
     private readonly ICustomerService _customerService;
     private readonly ICustomerReminderModelFactory _modelFactory;
     private readonly INotificationService _notificationService;
     private readonly IDateTimeHelper _dateTimeHelper;
+    private readonly IPermissionService _permissionService;
+
+    #endregion
+
+    #region Ctor
 
     public CustomerReminderController(
         ICustomerReminderService service,
         ICustomerService customerService,
         ICustomerReminderModelFactory modelFactory,
         INotificationService notificationService,
-        IDateTimeHelper dateTimeHelper)
+        IDateTimeHelper dateTimeHelper,
+        IPermissionService permissionService)
     {
         _service = service;
         _customerService = customerService;
         _modelFactory = modelFactory;
         _notificationService = notificationService;
         _dateTimeHelper = dateTimeHelper;
+        _permissionService = permissionService;
     }
+
+    #endregion
+
+    #region Methods
 
     #region LIST
 
-    public IActionResult List()
+    public async Task<IActionResult> List()
     {
+        //if(await _permissionService.AuthorizeAsync())
+        //{
+        //    return AccessDeniedView();
+        //}
         var model = new CustomerReminderSearchModel();
         model.SetGridPageSize();
         return View("~/Plugins/Misc.CustomerReminder/Views/CustomerReminder/List.cshtml", model);
@@ -43,8 +63,10 @@ public class CustomerReminderController : BaseAdminController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> List(CustomerReminderSearchModel searchModel)
     {
+        var sortColumn = Convert.ToInt32(Request.Form["order[0][column]"]);
+        var sortDirection = Request.Form["order[0][dir]"].ToString();
         var model = await _modelFactory
-            .PrepareCustomerReminderListModelAsync(searchModel);
+        .PrepareCustomerReminderListModelAsync(searchModel, sortColumn, sortDirection);
 
         return Json(new
         {
@@ -166,6 +188,8 @@ public class CustomerReminderController : BaseAdminController
 
         return RedirectToAction("List");
     }
+
+    #endregion
 
     #endregion
 }
