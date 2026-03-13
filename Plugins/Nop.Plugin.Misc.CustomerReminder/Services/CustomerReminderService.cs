@@ -34,7 +34,9 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
     int? customerId = null,
     bool? isSent = null,
     DateTime? fromDate = null,
-    DateTime? toDate = null)
+    DateTime? toDate = null,
+    int sortColumn = 0,
+    string sortDirection = "desc")
         {
             var query = _repository.Table;
 
@@ -49,6 +51,40 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
 
             if (toDate.HasValue)
                 query = query.Where(x => x.ReminderDate <= toDate.Value);
+
+            // -----------------------------
+            // APPLY SORTING
+            // -----------------------------
+            switch (sortColumn)
+            {
+                case 0: // Id
+                    query = sortDirection == "asc"
+                        ? query.OrderBy(x => x.Id)
+                        : query.OrderByDescending(x => x.Id);
+                    break;
+
+                case 2: // Title
+                    query = sortDirection == "asc"
+                        ? query.OrderBy(x => x.ReminderTitle)
+                        : query.OrderByDescending(x => x.ReminderTitle);
+                    break;
+
+                case 3: // Reminder Date
+                    query = sortDirection == "asc"
+                        ? query.OrderBy(x => x.ReminderDate)
+                        : query.OrderByDescending(x => x.ReminderDate);
+                    break;
+
+                case 4: // Sent
+                    query = sortDirection == "asc"
+                        ? query.OrderBy(x => x.IsSent)
+                        : query.OrderByDescending(x => x.IsSent);
+                    break;
+
+                default:
+                    query = query.OrderByDescending(x => x.Id);
+                    break;
+            }
 
             return await query.ToPagedListAsync(pageIndex, pageSize);
         }

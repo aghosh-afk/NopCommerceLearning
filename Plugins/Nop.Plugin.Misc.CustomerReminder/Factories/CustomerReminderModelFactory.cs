@@ -53,41 +53,37 @@ public class CustomerReminderModelFactory : ICustomerReminderModelFactory
         return model;
     }
 
-    public async Task<CustomerReminderListModel> PrepareCustomerReminderListModelAsync(CustomerReminderSearchModel searchModel)
+    public async Task<CustomerReminderListModel> PrepareCustomerReminderListModelAsync(
+    CustomerReminderSearchModel searchModel,
+    int sortColumn,
+    string sortDirection)
     {
         ArgumentNullException.ThrowIfNull(searchModel);
 
+        // Get paged reminders with sorting
         var reminders = await _reminderService.GetAllPagedAsync(
             pageIndex: searchModel.Page - 1,
             pageSize: searchModel.PageSize,
             customerId: searchModel.CustomerId,
             isSent: searchModel.IsSent,
             fromDate: searchModel.FromDate,
-            toDate: searchModel.ToDate);
+            toDate: searchModel.ToDate,
+            sortColumn: sortColumn,
+            sortDirection: sortDirection);
 
-        // 🔥 Get all distinct customer IDs from this page
+        // Get unique customer IDs from page
         var customerIds = reminders
             .Select(x => x.CustomerId)
             .Distinct()
-            .ToList();
+            .ToArray();
 
-        // 🔥 Load customers once (avoid duplicate calls)
-        var customerDictionary = new Dictionary<int, string>();
+        // Load customers in one query (better performance)
+        var customers = await _customerService.GetCustomersByIdsAsync(customerIds);
 
-        foreach (var id in customerIds)
-        {
-            var customer = await _customerService.GetCustomerByIdAsync(id);
-
-            if (customer != null)
-            {
-                customerDictionary[id] =
-                    $"{customer.FirstName} {customer.LastName} ({customer.Email})";
-            }
-            else
-            {
-                customerDictionary[id] = "Deleted Customer";
-            }
-        }
+        var customerDictionary = customers.ToDictionary(
+            c => c.Id,
+            c => $"{c.FirstName} {c.LastName} ({c.Email})"
+        );
 
         var model = new CustomerReminderListModel();
 
@@ -100,7 +96,7 @@ public class CustomerReminderModelFactory : ICustomerReminderModelFactory
                 CustomerId = reminder.CustomerId,
                 CustomerName = customerDictionary.ContainsKey(reminder.CustomerId)
                     ? customerDictionary[reminder.CustomerId]
-                    : "Unknown",
+                    : "Deleted Customer",
                 ReminderTitle = reminder.ReminderTitle,
                 ReminderMessage = reminder.ReminderMessage,
                 ReminderDate = reminder.ReminderDate,

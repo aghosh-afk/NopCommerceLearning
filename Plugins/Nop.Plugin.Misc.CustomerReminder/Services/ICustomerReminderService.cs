@@ -11,7 +11,9 @@ namespace Nop.Plugin.Misc.CustomerReminder.Services
     int? customerId = null,
     bool? isSent = null,
     DateTime? fromDate = null,
-    DateTime? toDate = null);
+    DateTime? toDate = null,
+    int sortColumn = 0,
+    string sortDirection = "desc");
         Task<CustomerReminderRecord?> GetByIdAsync(int id);
         Task InsertAsync(CustomerReminderRecord record);
         Task UpdateAsync(CustomerReminderRecord record);

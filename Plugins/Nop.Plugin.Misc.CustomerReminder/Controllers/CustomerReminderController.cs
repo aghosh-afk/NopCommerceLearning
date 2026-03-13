@@ -63,8 +63,10 @@ public class CustomerReminderController : BaseAdminController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> List(CustomerReminderSearchModel searchModel)
     {
+        var sortColumn = Convert.ToInt32(Request.Form["order[0][column]"]);
+        var sortDirection = Request.Form["order[0][dir]"].ToString();
         var model = await _modelFactory
-            .PrepareCustomerReminderListModelAsync(searchModel);
+        .PrepareCustomerReminderListModelAsync(searchModel, sortColumn, sortDirection);
 
         return Json(new
         {
